@@ -1,4 +1,5 @@
 data/
 download/
+input_stock
 .venv
 chromedriver

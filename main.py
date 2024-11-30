@@ -1,5 +1,7 @@
 import subprocess
 import sys
+import os
+import shutil
 from pathlib import Path
 
 def run_script(script_name, args=None):
@@ -13,16 +15,67 @@ def run_script(script_name, args=None):
     else:
         print(result.stdout)
 
+def get_stock_numbers():
+    """Get stock numbers either manually or by reading all files in the 'input_stock' directory."""
+    # Ensure the input_stock directory exists
+    input_dir = Path("input_stock")
+    replace_directory(input_dir)
+
+    print("Choose input method for stock numbers:")
+    print("1. Enter manually")
+    print("2. Load all stock IDs from files in 'input_stock' directory")
+    print("3. Generate a template file in 'input_stock' directory")
+    choice = input("Enter your choice (1, 2, or 3): ").strip()
+
+    if choice == "1":
+        stock_numbers = input("Enter a comma-separated list of stock IDs: ").split(",")
+    elif choice == "2":
+        # Collect stock IDs from all files in the input_stock directory
+        stock_numbers = []
+        for file in input_dir.iterdir():
+            if file.is_file():
+                try:
+                    with open(file, "r") as f:
+                        file_stock_numbers = [line.strip() for line in f if line.strip()]
+                        stock_numbers.extend(file_stock_numbers)
+                        # print(f"Loaded {len(file_stock_numbers)} stock IDs from {file.name}")
+                except Exception as e:
+                    print(f"Error reading file {file.name}: {e}")
+        if not stock_numbers:
+            print(f"No valid stock IDs found in 'input_stock' directory.")
+            sys.exit(1)
+    elif choice == "3":
+        template_file = input_dir / "template_stock_ids.txt"
+        with open(template_file, "w") as file:
+            file.write("2303\n")
+            file.write("2330\n")
+        print(f"Template file created: {template_file}")
+        sys.exit(0)
+    else:
+        print("Invalid choice. Exiting.")
+        sys.exit(1)
+
+    print(f"Total stock IDs loaded: {len(stock_numbers)}")
+    print(stock_numbers)
+    return stock_numbers
+
+def replace_directory(path):
+    if os.path.exists(path):
+        shutil.rmtree(path)
+    os.mkdir(path)
+        
+        
+
 def main():
-    # Input for stock list and start date
-    stock_numbers = input("Enter a comma-separated list of stock IDs: ").split(",")
+    # Input for stock numbers and start date
+    stock_numbers = get_stock_numbers()
     start_date = input("Enter the start date (YYYY-MM-DD): ")
 
     # Ensure the required directories exist
     download_dir = Path("download")
     data_dir = Path("data/stock")
-    download_dir.mkdir(parents=True, exist_ok=True)
-    data_dir.mkdir(parents=True, exist_ok=True)
+    replace_directory(download_dir)
+    replace_directory(data_dir)
     
     # Step 1: Run the download script
     print("Running download.py...")

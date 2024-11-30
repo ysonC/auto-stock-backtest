@@ -21,6 +21,8 @@ chromedriver_path = "/home/yson/coding/auto-stock-backtest/chromedriver"
 
 # Configure Chrome options for headless mode and downloading
 download_dir = "download"
+Path(download_dir).mkdir(exist_ok=True)  # Ensure download directory exists
+error_log_path = Path("error_log.txt")  # Path for the error log file
 chrome_options = Options()
 chrome_options.add_argument("--headless")
 chrome_options.add_argument("--no-sandbox")
@@ -40,10 +42,12 @@ service = Service(chromedriver_path)
 # Initialize WebDriver with Chrome options
 driver = webdriver.Chrome(service=service, options=chrome_options)
 
+error_stocks = []  # List to store stocks causing errors
+
 try:
     total_stocks = len(stock_numbers)
-    try:
-        for index, stock_number in enumerate(stock_numbers, start=1):
+    for index, stock_number in enumerate(stock_numbers, start=1):
+        try:
             print(f"[{index}/{total_stocks}] Processing stock: {stock_number}")
 
             # Open the webpage with the current stock number
@@ -75,9 +79,15 @@ try:
             downloaded_file.rename(new_file_name)
             
             print(f"[{index}/{total_stocks}] Downloaded: {stock_number}")
-    except Exception as e:
-        print(f"Error while processing stock {stock_number}: {e}")
+
+        except Exception as e:
+            print(f"Error while processing stock {stock_number}: {e}")
+            error_stocks.append(stock_number)  # Add stock number to error list
 
 finally:
+    # Write errors to the log file
+    if error_stocks:
+        print(f"Error stock number: {error_stocks}")
+
     # Close the browser
     driver.quit()

@@ -63,6 +63,7 @@ def get_stock_and_date():
     print(f"Start date selected: {start_date}")
     print(f"Total stock IDs loaded: {len(stock_numbers)}")
     print(stock_numbers)
+    print("----------------------------------------------------")
     return stock_numbers, start_date
 
 def replace_directory(path):
@@ -74,33 +75,35 @@ def replace_directory(path):
         
 
 def main():
-    # Input for stock numbers and start date
-    stock_numbers, start_date = get_stock_and_date()
-    # start_date = input("Enter the start date (YYYY-MM-DD): ")
-
     # Ensure the required directories exist
     download_dir = Path("download")
     data_dir = Path("data/stock")
     replace_directory(download_dir)
     replace_directory(data_dir)
     
+    # Input for stock numbers and start date
+    stock_numbers, start_date = get_stock_and_date()
+    
     # Step 1: Run the download script
-    print("----------------------------------------------------")
+    print("Step 1: Downloads stock data.")
     print("Running download.py...")
     run_script("download.py", args=[",".join(stock_numbers), start_date])
     print("----------------------------------------------------")
 
     # Step 2: Run the extract_data script
+    print("Step 2: Extracts the required data from downloaded files.")
     print("Running extract_data.py...")
     run_script("extract_data.py")
     print("----------------------------------------------------")
 
     # Step 3: Run the process script
+    print("Step 3: Processes and analyzes the data.")
     print("Running process.py...")
     run_script("process.py")
     print("----------------------------------------------------")
 
     # Step 4: Run the backtest script
+    print("Step 4: Performs backtesting on the processed data.")
     print("Running backtest.py...")
     run_script("backtest.py")
     print("----------------------------------------------------")

@@ -3,6 +3,7 @@ import sys
 import os
 import shutil
 from pathlib import Path
+from download import download_stock_data
 
 def run_script(script_name, args=None):
     """Run a Python script with optional arguments."""
@@ -87,7 +88,7 @@ def main():
     # Step 1: Run the download script
     print("Step 1: Downloads stock data.")
     print("Running download.py...")
-    run_script("download.py", args=[",".join(stock_numbers), start_date])
+    download_stock_data(stock_numbers, start_date)
     print("----------------------------------------------------")
 
     # Step 2: Run the extract_data script

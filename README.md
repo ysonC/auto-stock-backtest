@@ -66,7 +66,6 @@ python main.py
 
 ### Running Scripts Independently
 You can run each script independently:
-- **Download Data**: `download.py`
 - **Extract Data**: `extract_data.py`
 - **Process Data**: `process.py`
 - **Backtest**: `backtest.py`

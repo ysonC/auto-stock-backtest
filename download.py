@@ -17,7 +17,7 @@ stock_numbers = sys.argv[1].split(",")
 start_date = sys.argv[2]
 
 # Full path to ChromeDriver
-chromedriver_path = "/home/yson/coding/stock-info-scraping/chromedriver"
+chromedriver_path = "/home/yson/coding/auto-stock-backtest/chromedriver"
 
 # Configure Chrome options for headless mode and downloading
 download_dir = "download"

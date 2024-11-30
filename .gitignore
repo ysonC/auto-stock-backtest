@@ -1,3 +1,4 @@
 data/
 download/
 .venv
+chromedriver

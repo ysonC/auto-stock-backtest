@@ -23,7 +23,7 @@ def main():
     data_dir = Path("data/stock")
     download_dir.mkdir(parents=True, exist_ok=True)
     data_dir.mkdir(parents=True, exist_ok=True)
-
+    
     # Step 1: Run the download script
     print("Running download.py...")
     run_script("download.py", args=[",".join(stock_numbers), start_date])

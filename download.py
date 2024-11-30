@@ -42,39 +42,41 @@ driver = webdriver.Chrome(service=service, options=chrome_options)
 
 try:
     total_stocks = len(stock_numbers)
-    for index, stock_number in enumerate(stock_numbers, start=1):
-        print(f"[{index}/{total_stocks}] Processing stock: {stock_number}")
+    try:
+        for index, stock_number in enumerate(stock_numbers, start=1):
+            print(f"[{index}/{total_stocks}] Processing stock: {stock_number}")
 
-        # Open the webpage with the current stock number
-        driver.get(f"https://goodinfo.tw/tw/ShowK_ChartFlow.asp?RPT_CAT=PER&STOCK_ID={stock_number}")
+            # Open the webpage with the current stock number
+            driver.get(f"https://goodinfo.tw/tw/ShowK_ChartFlow.asp?RPT_CAT=PER&STOCK_ID={stock_number}")
 
-        # Wait for the element `divDetail` to be present
-        WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.ID, "divDetail"))
-        )
+            # Wait for the element `divDetail` to be present
+            WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located((By.ID, "divDetail"))
+            )
 
-        # Set the value of start time
-        driver.execute_script(f"document.getElementById('edtSTART_TIME').value = '{start_date}';")
+            # Set the value of start time
+            driver.execute_script(f"document.getElementById('edtSTART_TIME').value = '{start_date}';")
 
-        # Reload the details
-        driver.execute_script("ReloadDetail();")
-        
-        # Wait for the `divK_ChartFlowDetail` to reload
-        time.sleep(2)
-        
-        # Execute JavaScript to trigger the download button
-        driver.execute_script("export2html(divDetail.innerHTML, 'K_ChartFlow.html');")
+            # Reload the details
+            driver.execute_script("ReloadDetail();")
+            
+            # Wait for the `divK_ChartFlowDetail` to reload
+            time.sleep(2)
+            
+            # Execute JavaScript to trigger the download button
+            driver.execute_script("export2html(divDetail.innerHTML, 'K_ChartFlow.html');")
 
-        # Wait for the file to download by checking if the file exists in the download directory
-        downloaded_file = Path(download_dir) / "K_ChartFlow.html"
-        WebDriverWait(driver, 20).until(lambda d: downloaded_file.exists())
+            # Wait for the file to download by checking if the file exists in the download directory
+            downloaded_file = Path(download_dir) / "K_ChartFlow.html"
+            WebDriverWait(driver, 20).until(lambda d: downloaded_file.exists())
 
-        # Rename the file to the stock number
-        new_file_name = Path(download_dir) / f"{stock_number}.html"
-        downloaded_file.rename(new_file_name)
-        
-        print(f"[{index}/{total_stocks}] Downloaded: {stock_number}")
-
+            # Rename the file to the stock number
+            new_file_name = Path(download_dir) / f"{stock_number}.html"
+            downloaded_file.rename(new_file_name)
+            
+            print(f"[{index}/{total_stocks}] Downloaded: {stock_number}")
+    except Exception as e:
+        print(f"Error while processing stock {stock_number}: {e}")
 
 finally:
     # Close the browser

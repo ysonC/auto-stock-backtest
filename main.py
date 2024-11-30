@@ -19,7 +19,7 @@ def get_stock_numbers():
     """Get stock numbers either manually or by reading all files in the 'input_stock' directory."""
     # Ensure the input_stock directory exists
     input_dir = Path("input_stock")
-    replace_directory(input_dir)
+    input_dir.mkdir(parents=True, exist_ok=True)
 
     print("Choose input method for stock numbers:")
     print("1. Enter manually")
@@ -60,6 +60,7 @@ def get_stock_numbers():
     return stock_numbers
 
 def replace_directory(path):
+    """"Check and remove old diectory for fresh start"""
     if os.path.exists(path):
         shutil.rmtree(path)
     os.mkdir(path)

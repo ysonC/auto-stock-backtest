@@ -22,6 +22,19 @@ Automate the process of downloading, processing, and analyzing stock data to per
    pip install -r requirements.txt
    ```
 
+### 3. Test the main sciprt
+1. Create a template first
+   ```bash
+   python3 main.py
+   ```
+   - input 3
+
+2. Test with option 2
+   ```bash
+   python3 main.py
+   ```
+   - input 2
+
 ---
 
 ## Manual Installation

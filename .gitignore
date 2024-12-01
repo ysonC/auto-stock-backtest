@@ -1,5 +1,6 @@
 data/
 download/
+__pycache__/
 input_stock
 .venv
 chromedriver

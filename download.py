@@ -7,12 +7,14 @@ from selenium.webdriver.support import expected_conditions as EC
 from pathlib import Path
 from tqdm import tqdm  # Progress bar
 import time
+import os
 
 
 def download_stock_data(stock_numbers, start_date):
-    # Full path to ChromeDriver
-    chromedriver_path = "/Users/w.cheng/Code/auto-stock-backtest/chromedriver"
-
+    # Auto get path of chromedriver
+    chromedriver_path = os.getcwd()
+    chromedriver_path = os.path.join(chromedriver_path, "chromedriver")
+    
     # Configure Chrome options for headless mode and downloading
     download_dir = "download"
     Path(download_dir).mkdir(exist_ok=True)  # Ensure download directory exists

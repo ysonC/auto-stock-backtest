@@ -22,11 +22,8 @@ def setup_environment():
 
     # Create and activate virtual environment and install requirements
     print("Creating venv environment...")
-    venv_cmd = "python3 -m venv .venv && source .venv/bin/activate"
+    venv_cmd = "python3 -m venv .venv"
     run_command(venv_cmd, "Creating virtual environment and installing Python dependencies")
-    
-    print("Installing requirements...")
-    run_command("pip install -r requirements.txt")
     
     # Update system and install required libraries
     print("\nUpdating system and installing required libraries...")
@@ -36,7 +33,7 @@ def setup_environment():
         run_command("sudo apt install -y libnss3 libxss1 libappindicator3-1 libasound2", "Installing required libraries")
     elif platform.system() == "Darwin":
         run_command("brew update", "Updating Homebrew")
-        run_command("brew install wget libnss", "Installing required libraries")
+        # run_command("brew install wget libnss", "Installing required libraries")
 
 def install_chrome_and_chromedriver(temp_dir):
     """Install Google Chrome and ChromeDriver."""

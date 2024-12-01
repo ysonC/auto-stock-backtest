@@ -9,11 +9,22 @@ Automate the process of downloading, processing, and analyzing stock data to per
 
 ## Installation
 
-### 0. Run automated setup script
+### 1. Run automated setup script
 1. Run:
    ```bash
    python3 setup.py
    ```
+
+### 2. Set Up Python Environment
+1. Activate virtual environment and install for Python packages:
+   ```bash
+   source .venv/bin/activate
+   pip install -r requirements.txt
+   ```
+
+---
+
+## Manual Installation
 
 ### 1. Set Up Python Environment
 1. Create a virtual environment for Python packages:

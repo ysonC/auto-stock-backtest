@@ -20,19 +20,23 @@ def setup_environment():
     """Set up the Python environment and dependencies."""
     print("\nSetting up Python environment...")
 
-    # Create and activate virtual environment
-    if platform.system() == "Windows":
-        venv_cmd = "python -m venv .venv && .venv\\Scripts\\activate && pip install -r requirements.txt"
-    else:
-        venv_cmd = "python3 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt"
-
+    # Create and activate virtual environment and install requirements
+    print("Creating venv environment...")
+    venv_cmd = "python3 -m venv .venv && source .venv/bin/activate"
     run_command(venv_cmd, "Creating virtual environment and installing Python dependencies")
-
-    print("\nUpdating system and installing required libraries...")
-
+    
+    print("Installing requirements...")
+    run_command("pip install -r requirements.txt")
+    
     # Update system and install required libraries
-    run_command("sudo apt update && sudo apt upgrade -y", "Updating system")
-    run_command("sudo apt install -y libnss3 libxss1 libappindicator3-1 libasound2", "Installing required libraries")
+    print("\nUpdating system and installing required libraries...")
+        # Update system and install required libraries
+    if platform.system() == "Linux":
+        run_command("sudo apt update && sudo apt upgrade -y", "Updating system")
+        run_command("sudo apt install -y libnss3 libxss1 libappindicator3-1 libasound2", "Installing required libraries")
+    elif platform.system() == "Darwin":
+        run_command("brew update", "Updating Homebrew")
+        run_command("brew install wget libnss", "Installing required libraries")
 
 def install_chrome_and_chromedriver(temp_dir):
     """Install Google Chrome and ChromeDriver."""
@@ -81,7 +85,7 @@ if __name__ == "__main__":
         print(f"Temporary directory created: {temp_dir}")
 
         # Step 1: Set up Python environment
-        # setup_environment()
+        setup_environment()
 
         # Step 2: Install Chrome and ChromeDriver
         install_chrome_and_chromedriver(temp_dir)

@@ -1,11 +1,12 @@
 import os
 import pandas as pd
 from bs4 import BeautifulSoup
+from pathlib import Path
 
 # Directories
 download_dir = "download"
 output_dir = "data/stock"
-os.makedirs(output_dir, exist_ok=True)  # Ensure the output directory exists
+Path(output_dir).mkdir(parents=True, exist_ok=True)        
 
 # Parse each HTML file in the download directory
 for filename in os.listdir(download_dir):

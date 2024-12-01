@@ -71,8 +71,7 @@ def replace_directory(path):
     """"Check and remove old diectory for fresh start"""
     if os.path.exists(path):
         shutil.rmtree(path)
-    os.mkdir(path)
-        
+    Path(path).mkdir(parents=True, exist_ok=True)        
         
 
 def main():

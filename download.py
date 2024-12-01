@@ -11,7 +11,7 @@ import time
 
 def download_stock_data(stock_numbers, start_date):
     # Full path to ChromeDriver
-    chromedriver_path = "/home/yson/coding/auto-stock-backtest/chromedriver"
+    chromedriver_path = "/Users/w.cheng/Code/auto-stock-backtest/chromedriver"
 
     # Configure Chrome options for headless mode and downloading
     download_dir = "download"

@@ -1,12 +1,13 @@
 from bs4 import BeautifulSoup
 import os
 import pandas as pd
+from pathlib import Path
 
 # Directory containing the HTML files
 download_dir = "download"
 
 data_dir = "data"
-os.makedirs(data_dir, exist_ok=True)
+Path(data_dir).mkdir(parents=True, exist_ok=True)        
 
 # Initialize a list to store data
 data = []

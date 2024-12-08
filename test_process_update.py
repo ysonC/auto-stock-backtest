@@ -70,7 +70,7 @@ for filename in os.listdir(input_dir):
 summary_df = pd.DataFrame(all_summaries)
 
 # Save the combined summary to an Excel file
-output_file = Path(data_dir) / "all_stock_summaries.xlsx"
+output_file = Path(data_dir) / "process_data.xlsx"
 summary_df.to_excel(output_file, index=False)
 
 print(f"Processed data has been saved to {output_file}")

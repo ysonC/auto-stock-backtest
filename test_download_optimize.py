@@ -12,6 +12,11 @@ import os
 import time
 from datetime import datetime  # For dynamic date
 
+def read_stock_numbers_from_file(file_path):
+    """Reads stock numbers from a text file."""
+    with open(file_path, 'r', encoding='utf-8') as f:
+        return [line.strip() for line in f if line.strip()]
+
 def download_stock_data(stock_numbers, start_date):
     # Get today's date dynamically
     end_date = datetime.now().strftime("%Y-%m-%d")  # Format: YYYY-MM-DD
@@ -106,6 +111,7 @@ def download_stock_data(stock_numbers, start_date):
 
 # Example usage
 if __name__ == "__main__":
-    stock_numbers = ["2330", "2303"]  # Add your stock numbers here
+    stock_file = "stock_numbers.txt"  # Input file containing stock numbers
+    stock_numbers = read_stock_numbers_from_file(stock_file)
     start_date = "2020-01-01"
     download_stock_data(stock_numbers, start_date)

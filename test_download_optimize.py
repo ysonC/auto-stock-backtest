@@ -86,7 +86,7 @@ def download_stock_data(stock_numbers, start_date):
                             data.append(cells)
 
                     # Save data to a CSV file
-                    output_file = Path(download_dir) / f"{stock_number}_stock_data.csv"
+                    output_file = Path(download_dir) / f"{stock_number}.xlsx"
                     with open(output_file, "w", newline="", encoding="utf-8") as csvfile:
                         writer = csv.writer(csvfile)
                         writer.writerow(header)  # Write hardcoded header

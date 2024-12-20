@@ -86,7 +86,7 @@ def download_stock_data(stock_numbers, start_date):
                             data.append(cells)
 
                     # Save data to a CSV file
-                    output_file = Path(download_dir) / f"{stock_number}.xlsx"
+                    output_file = Path(download_dir) / f"{stock_number}.csv"
                     with open(output_file, "w", newline="", encoding="utf-8") as csvfile:
                         writer = csv.writer(csvfile)
                         writer.writerow(header)  # Write hardcoded header
@@ -113,5 +113,5 @@ def download_stock_data(stock_numbers, start_date):
 if __name__ == "__main__":
     stock_file = "stock_numbers.txt"  # Input file containing stock numbers
     stock_numbers = read_stock_numbers_from_file(stock_file)
-    start_date = "2020-01-01"
+    start_date = "2001-03-28"
     download_stock_data(stock_numbers, start_date)

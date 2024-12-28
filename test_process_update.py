@@ -5,7 +5,9 @@ import os
 # Input and output directories
 input_dir = "download"
 data_dir = "data"  # Directory to save processed data
-Path(data_dir).mkdir(parents=True, exist_ok=True)  # Ensure directory exists
+# Subdirectory for Date and Price data
+date_price_dir = Path(data_dir) / "stock_price"
+date_price_dir.mkdir(parents=True, exist_ok=True)  # Ensure directory exists
 
 # Initialize an empty list to collect all summaries
 all_summaries = []
@@ -31,6 +33,14 @@ for filename in os.listdir(input_dir):
                 f"File {filename} is missing some expected columns: {expected_columns}")
             continue  # Skip this file
 
+        # Extract Date and Price columns and save to a separate file for each stock
+        if 'Date' in df.columns and 'Price' in df.columns:
+            date_price_df = df[['Date', 'Price']].dropna(
+                subset=['Date', 'Price'])
+            output_file = date_price_dir / f"{stock_id}"
+            date_price_df.to_csv(output_file, index=False)
+            print(f"Date and Price data for {stock_id} saved to {output_file}")
+
         # Calculate required values
         df['Price'] = pd.to_numeric(df['Price'], errors='coerce')
         df['PER'] = pd.to_numeric(df['PER'], errors='coerce')
@@ -43,13 +53,7 @@ for filename in os.listdir(input_dir):
         # Drop rows with NaN in 'PER' for further calculations
         df_clean = df.dropna(subset=['PER'])
 
-        '''
-        N	25 Delta	Formula: (Current PER - GEP.25) / (Max PER - Min PER).
-        O	MED Delta	Formula: (Current PER - GEP.MED) / (Max PER - Min PER).
-        P	Mean Delta	Formula: (Current PER - 5Y Mean) / (Max PER - Min PER).
-        Q	Min Delta	Formula: (Current PER - Min PER) / (Max PER - Min PER).
-        '''
-
+        # Calculate statistical metrics
         mean_per = df_clean['PER'].mean() if not df_clean.empty else None
         min_per = df_clean['PER'].min() if not df_clean.empty else None
         median_per = df_clean['PER'].median() if not df_clean.empty else None
@@ -66,6 +70,10 @@ for filename in os.listdir(input_dir):
         min_delta = (latest_per - min_per) / (max_per -
                                               min_per) if latest_per and min_per and max_per and min_per else None
 
+        median_price = (median_per/latest_per) * \
+            latest_closing_price if median_per and latest_per and latest_closing_price else None
+        mp_up_down = (median_price - latest_closing_price)/latest_closing_price if median_price and latest_closing_price else None
+            
         # Summary for this stock
         summary = {
             "Stock ID": stock_id,
@@ -79,7 +87,12 @@ for filename in os.listdir(input_dir):
             "25 Delta": round(quartile_delta, 2),
             "Median Delta": round(median_delta, 2),
             "Mean Delta": round(mean_delta, 2),
-            "Min Delta": round(min_delta, 2)
+            "Min Delta": round(min_delta, 2),
+            "####": "####",
+            "C$": round(latest_closing_price, 2),
+            "M$": round(median_price, 2),
+            "T$": "####",
+            "MP UpDown": mp_up_down *100
         }
 
         # Append the summary to the list
@@ -87,9 +100,9 @@ for filename in os.listdir(input_dir):
 
 # Convert all summaries to a DataFrame
 summary_df = pd.DataFrame(all_summaries)
-print("#############################################################################################################################")
+print("################################################################################################################################################")
 print(summary_df)
-print("#############################################################################################################################")
+print("################################################################################################################################################")
 # Save the combined summary to an Excel file
 output_file = Path(data_dir) / "process_data.xlsx"
 summary_df.to_excel(output_file, index=False)

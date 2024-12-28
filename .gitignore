@@ -4,3 +4,4 @@ __pycache__/
 input_stock
 .venv
 chromedriver
+.DS_Store

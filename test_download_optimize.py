@@ -22,7 +22,7 @@ def download_stock_data(stock_numbers, start_date):
     end_date = datetime.now().strftime("%Y-%m-%d")  # Format: YYYY-MM-DD
 
     # Configuration
-    chromedriver_path = os.path.join(os.getcwd(), "chromedriver")
+    chromedriver_path = os.path.join(os.getcwd(), "setup/chromedriver")
     download_dir = "download"
     Path(download_dir).mkdir(exist_ok=True)  # Ensure download directory exists
 

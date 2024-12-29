@@ -7,10 +7,11 @@ from helpers import *
 def process_downloaded_stocks():
     # Input and output directories
     input_dir = "download"
-    data_dir = "data"  # Directory to save processed data
+    data_dir = "data"
+    create_folder(data_dir)
     # Subdirectory for Date and Price data
     date_price_dir = Path(data_dir) / "stock_price"
-    date_price_dir.mkdir(parents=True, exist_ok=True)  # Ensure directory exists
+    create_folder(date_price_dir)
 
     # Initialize an empty list to collect all summaries
     all_summaries = []
@@ -63,7 +64,6 @@ def process_downloaded_stocks():
             min_delta = (latest_per - min_per) / (max_per - min_per) if latest_per and min_per and max_per and min_per else None
 
             median_price = (median_per / latest_per) * latest_closing_price if median_per and latest_per and latest_closing_price else None
-            mp_up_down = (median_price - latest_closing_price) / latest_closing_price if median_price and latest_closing_price else None
 
             # Summary for this stock
             summary = {
@@ -89,9 +89,10 @@ def process_downloaded_stocks():
     print("###########################################################################################################################")
     print(summary_df)
     print("###########################################################################################################################")
-    # Save the combined summary to an Excel file
-    output_file = Path(data_dir) / "process_data.xlsx"
-    save_to_excel(summary_df, output_file)
+    
+    # Save the combined summary to a CSV file
+    output_file = Path(data_dir) / "process_data.csv"
+    save_to_csv(summary_df, output_file, False)
 
 
 if __name__ == "__main__":

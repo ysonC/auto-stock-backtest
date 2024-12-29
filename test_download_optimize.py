@@ -1,3 +1,4 @@
+import pandas as pd
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
@@ -7,10 +8,9 @@ from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup  # For parsing HTML efficiently
 from pathlib import Path
 from tqdm import tqdm
-import csv
 import os
-import time
 from datetime import datetime  # For dynamic date
+from helpers import *
 
 def read_stock_numbers_from_file(file_path):
     """Reads stock numbers from a text file."""
@@ -85,12 +85,10 @@ def download_stock_data(stock_numbers, start_date):
                         if cells:
                             data.append(cells)
 
-                    # Save data to a CSV file
-                    output_file = Path(download_dir) / f"{stock_number}.csv"
-                    with open(output_file, "w", newline="", encoding="utf-8") as csvfile:
-                        writer = csv.writer(csvfile)
-                        writer.writerow(header)  # Write hardcoded header
-                        writer.writerows(data)  # Write data rows
+                    # Save data to a CSV file using pandas
+                    output_file_path = Path(download_dir) / f"{stock_number}.csv"
+                    df = pd.DataFrame(data, columns=header)
+                    save_to_csv(df, output_file_path, False)
 
                 except Exception as e:
                     print(f"Error while processing stock {stock_number}: {e}")
@@ -106,8 +104,9 @@ def download_stock_data(stock_numbers, start_date):
 
         # Close the browser
         driver.quit()
-
-    print("All stock data downloaded!")
+    print("####################################")
+    print("#### All stock data downloaded! ####")
+    print("####################################")
 
 # Example usage
 if __name__ == "__main__":

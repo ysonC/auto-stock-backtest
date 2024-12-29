@@ -28,7 +28,30 @@ def save_to_excel(dataframe, file_path):
         print(f"Data successfully saved to {file_path}")
     except Exception as e:
         print(f"Error saving to Excel file: {e}")
+
+def save_to_csv(dataframe, file_path, index=False):
+    """
+    Saves a pandas DataFrame to a CSV file.
+
+    Args:
+    - dataframe (pd.DataFrame): The DataFrame to save.
+    - file_path (str or Path): The path to save the CSV file.
+    - index (bool): Whether to include the DataFrame's index in the CSV. Default is False.
+    - encoding (str): The encoding for the CSV file. Default is 'utf-8'.
+
+    Returns:
+    - None
+    """
+    try:
+        file_path = Path(file_path)  # Ensure the file path is a Path object
+        file_path.parent.mkdir(parents=True, exist_ok=True)  # Ensure the parent directory exists
         
+        dataframe.to_csv(file_path, index=index, encoding="utf-8")
+        print(f"Data successfully saved to {file_path.resolve()}")
+    except Exception as e:
+        print(f"Error saving CSV file to {file_path}: {e}")
+
+
 def create_folder(folder_path):
     """
     Ensures that a folder exists. If it doesn't exist, it creates the folder.

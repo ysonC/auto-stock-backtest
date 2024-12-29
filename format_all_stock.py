@@ -23,6 +23,6 @@ def format_stock_numbers(input_file, output_file):
 
 
 # Example usage
-input_file = 'raw_stock_data.txt'  # Input file containing your stock data
+input_file = 'data/raw_stock_data.txt'  # Input file containing your stock data
 output_file = 'stock_numbers.txt'  # Output file
 format_stock_numbers(input_file, output_file)

@@ -1,6 +1,7 @@
 import pandas as pd
 from pathlib import Path
 import os
+from helpers import *
 
 # Input and output directories
 input_dir = "download"
@@ -19,11 +20,7 @@ for filename in os.listdir(input_dir):
         stock_id = filename.split("_")[0]  # Extract stock ID from filename
 
         # Load CSV file into a DataFrame
-        try:
-            df = pd.read_csv(file_path)
-        except Exception as e:
-            print(f"Error reading file {filename}: {e}")
-            continue  # Skip this file and move to the next
+        df = read_csv(file_path)
 
         # Ensure column names match expectations
         expected_columns = ['Date', 'Price', 'Change', '% Change',
@@ -35,8 +32,8 @@ for filename in os.listdir(input_dir):
 
         # Extract Date and Price columns and save to a separate file for each stock
         if 'Date' in df.columns and 'Price' in df.columns:
-            date_price_df = df[['Date', 'Price']].dropna(
-                subset=['Date', 'Price'])
+            date_price_df = df[['Date', 'Price','PER']].dropna(
+                subset=['Date', 'Price','PER'])
             output_file = date_price_dir / f"{stock_id}"
             date_price_df.to_csv(output_file, index=False)
             print(f"Date and Price data for {stock_id} saved to {output_file}")

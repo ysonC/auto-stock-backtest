@@ -2,13 +2,13 @@ import pandas as pd
 from pathlib import Path
 import os
 from .helpers import *
-from .config import DATA_DIR, STOCK_DATA_DIR, DOWNLOAD_DIR
+from .config import DATA_DIR, STOCK_DATA_DIR, DOWNLOAD_DIR, PROCESS_DATA_PATH, RESULTS_DIR
 
 def process_downloaded_stocks():
     # Input and output directories
     create_folder(DATA_DIR)
-    # Subdirectory for Date and Price data
     create_folder(STOCK_DATA_DIR)
+    create_folder(RESULTS_DIR)
 
     # Initialize an empty list to collect all summaries
     all_summaries = []
@@ -89,8 +89,7 @@ def process_downloaded_stocks():
     # print("###########################################################################################################################")
     
     # Save the combined summary to a CSV file
-    output_file = Path(DATA_DIR) / "process_data.csv"
-    save_to_csv(summary_df, output_file, False)
+    save_to_csv(summary_df, PROCESS_DATA_PATH, False)
     return summary_df
 
 

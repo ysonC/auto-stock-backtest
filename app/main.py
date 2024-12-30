@@ -1,7 +1,4 @@
-import subprocess
 import sys
-import os
-import shutil
 from pathlib import Path
 from halo import Halo
 from app import download_chromedriver, download_stock_data, read_stock_numbers_from_file, process_downloaded_stocks, process_stocks
@@ -15,20 +12,7 @@ def check_chromedriver():
         print("Installing ChromeDriver. . .")
         download_chromedriver()
 
-
-def run_script(script_name, args=None):
-    """Run a Python script with optional arguments."""
-    command = [sys.executable, script_name]
-    if args:
-        command.extend(args)
-    result = subprocess.run(command, capture_output=True, text=True)
-    if result.returncode != 0:
-        print(f"Error running {script_name}: {result.stderr}")
-    else:
-        print(result.stdout)
-
-
-def get_stock_and_date():
+def get_stock_numbers():
     """Get stock numbers either manually or by reading all files in the 'input_stock' directory."""
     # Ensure the input_stock directory exists
     input_dir = Path("input_stock")
@@ -77,7 +61,7 @@ def get_stock_and_date():
 
 def main():
     # Input for stock numbers and start date
-    stock_numbers = get_stock_and_date()
+    stock_numbers = get_stock_numbers()
     print(f"Total stock IDs loaded: {len(stock_numbers)}")
     print(stock_numbers)
     print("")

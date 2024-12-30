@@ -36,8 +36,8 @@ def setup_environment():
         # run_command("brew install wget libnss", "Installing required libraries")
 
 def install_chrome_and_chromedriver(temp_dir):
-    """Install Google Chrome and ChromeDriver."""
-    print("\nInstalling Google Chrome...")
+    """Download and install ChromeDriver."""
+    # print("\nInstalling Google Chrome...")
 
     # ChromeDriver setup
     print("\nSetting up ChromeDriver...")

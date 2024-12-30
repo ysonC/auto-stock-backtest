@@ -78,12 +78,6 @@ def replace_directory(path):
 
 def main():
     check_chromedriver()
-
-    # Ensure the required directories exist
-    download_dir = Path("download")
-    data_dir = Path("data/stock")
-    replace_directory(download_dir)
-    replace_directory(data_dir)
     
     # Input for stock numbers and start date
     stock_numbers= get_stock_and_date()

@@ -7,6 +7,8 @@ INPUT_DIR = BASE_DIR / "input_stock"
 DOWNLOAD_DIR = BASE_DIR / "download"
 DATA_DIR = BASE_DIR / "data"
 STOCK_PRICE_DIR = DATA_DIR / "stock_price"
+PROCESS_DATA_PATH = DATA_DIR / "process_data.csv"
+OUTPUT_DATA_PATH = DATA_DIR / "backtest_MR_data.csv"
 
 def backtest_MR(data, weeks, median_per):
     """
@@ -45,13 +47,11 @@ def process_stocks():
     - stock_folder_path (str): Path to the folder containing stock CSV files.
     - output_file_path (str): Path to save the final backtested data.
     """
-    # Define path
+    
     create_folder(STOCK_PRICE_DIR)
-    process_data_path = "data/process_data.csv"
-    output_file_path = "data/backtest_MR_data.csv"
     
     # Load process_data.xlsx
-    process_data_df = read_csv(process_data_path)
+    process_data_df = read_csv(PROCESS_DATA_PATH)
     result_list = []
 
     # Loop through each stock file in the folder
@@ -104,7 +104,7 @@ def process_stocks():
 
     # Convert results to DataFrame and save
     result_df = pd.DataFrame(result_list)
-    save_to_csv(result_df, output_file_path, False)
+    save_to_csv(result_df, OUTPUT_DATA_PATH, False)
     print("###########################################################################################")
     print(result_df)
     print("###########################################################################################")

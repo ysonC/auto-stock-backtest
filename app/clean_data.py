@@ -2,11 +2,7 @@ import pandas as pd
 from pathlib import Path
 import os
 from .helpers import *
-
-BASE_DIR = Path(__file__).resolve().parent
-DOWNLOAD_DIR = BASE_DIR / "download"
-DATA_DIR = BASE_DIR / "data"
-STOCK_DATA_DIR = DATA_DIR / "stock_data"
+from .config import DATA_DIR, STOCK_DATA_DIR, DOWNLOAD_DIR
 
 def process_downloaded_stocks():
     # Input and output directories

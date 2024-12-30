@@ -61,7 +61,7 @@ def install_chrome_and_chromedriver(temp_dir):
 
     print("Moving ChromeDriver to current directory...")
     chromedriver_extracted = os.path.join(temp_dir, f"chromedriver-{os_key}", "chromedriver")
-    shutil.move(chromedriver_extracted, "./setup/chromedriver")
+    shutil.move(chromedriver_extracted, "./resources/chromedriver")
 
     print("Cleaning up ChromeDriver zip and temp files...")
     os.remove(chromedriver_zip)

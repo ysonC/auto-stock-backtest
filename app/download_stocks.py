@@ -12,12 +12,7 @@ from halo import Halo
 import os
 from datetime import datetime
 from .helpers import *
-
-BASE_DIR = Path(__file__).resolve().parent
-INPUT_DIR = BASE_DIR / "input_stock"
-DOWNLOAD_DIR = BASE_DIR / "download"
-DATA_DIR = BASE_DIR / "data"
-STOCK_DATA_DIR = DATA_DIR / "stock_data"
+from .config import DOWNLOAD_DIR, CHROMEDRIVER_PATH
 
 def read_stock_numbers_from_file(file_path):
     """Reads stock numbers from a text file."""
@@ -49,7 +44,7 @@ def download_stock_data(stock_numbers):
     chrome_options.add_experimental_option("prefs", prefs)
 
     # Initialize WebDriver
-    service = Service(chromedriver_path)
+    service = Service(CHROMEDRIVER_PATH)
     driver = webdriver.Chrome(service=service, options=chrome_options)
 
     # Hardcoded header

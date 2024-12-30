@@ -1,14 +1,7 @@
 import pandas as pd
 import os
 from .helpers import *
-
-BASE_DIR = Path(__file__).resolve().parent
-INPUT_DIR = BASE_DIR / "input_stock"
-DOWNLOAD_DIR = BASE_DIR / "download"
-DATA_DIR = BASE_DIR / "data"
-STOCK_DATA_DIR = DATA_DIR / "stock_data"
-PROCESS_DATA_PATH = DATA_DIR / "process_data.csv"
-OUTPUT_DATA_PATH = DATA_DIR / "backtest_MR_data.csv"
+from .config import PROCESS_DATA_PATH, STOCK_DATA_DIR, OUTPUT_DATA_PATH
 
 def backtest_MR(data, weeks, median_per):
     """

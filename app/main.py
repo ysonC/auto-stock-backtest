@@ -9,7 +9,7 @@ from app import download_chromedriver, download_stock_data, read_stock_numbers_f
 
 def check_chromedriver():
     """Check if ChromeDriver is installed and accessible."""
-    chromedriver_path = Path("setup/chromedriver")
+    chromedriver_path = Path("resources/chromedriver")
     if not chromedriver_path.exists():
         print("ChromeDriver not found in 'setup/' directory.")
         print("Installing ChromeDriver. . .")

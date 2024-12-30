@@ -1,5 +1,6 @@
 import pandas as pd
 from pathlib import Path
+from halo import Halo
 
 def read_excel(file_path, sheet_name=None):
     """Reads an Excel file into a pandas DataFrame."""
@@ -61,3 +62,15 @@ def create_folder(folder_path):
     """
     folder = Path(folder_path)
     folder.mkdir(parents=True, exist_ok=True)
+    
+def run_process(task, task_description, success_message, failure_message):
+    """Runs a task with a spinner and handles success or failure."""
+    spinner = Halo(text=task_description, spinner='line', color='cyan')
+    spinner.start()
+    try:
+        result = task()
+        spinner.succeed(success_message)
+        return result
+    except Exception as e:
+        spinner.fail(failure_message)
+        raise e

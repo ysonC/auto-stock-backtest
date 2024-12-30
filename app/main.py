@@ -1,13 +1,19 @@
 import sys
 from pathlib import Path
 from halo import Halo
-from app import download_chromedriver, download_stock_data, read_stock_numbers_from_file, process_downloaded_stocks, process_stocks
+from app import (
+    download_chromedriver, 
+    download_stock_data, 
+    read_stock_numbers_from_file, 
+    process_downloaded_stocks, 
+    process_stocks, 
+    CHROMEDRIVER_PATH
+    )
 
 
 def check_chromedriver():
     """Check if ChromeDriver is installed and accessible."""
-    chromedriver_path = Path("resources/chromedriver")
-    if not chromedriver_path.exists():
+    if not CHROMEDRIVER_PATH.exists():
         print("ChromeDriver not found in 'setup/' directory.")
         print("Installing ChromeDriver. . .")
         download_chromedriver()

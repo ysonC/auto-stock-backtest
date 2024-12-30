@@ -14,6 +14,7 @@ from helpers import *
 
 BASE_DIR = Path(__file__).resolve().parent
 INPUT_DIR = BASE_DIR / "input_stock"
+DOWNLOAD_DIR = BASE_DIR / "download"
 DATA_DIR = BASE_DIR / "data"
 STOCK_PRICE_DIR = DATA_DIR / "stock_price"
 

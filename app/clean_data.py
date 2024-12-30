@@ -4,27 +4,23 @@ import os
 from helpers import *
 
 BASE_DIR = Path(__file__).resolve().parent
-INPUT_DIR = BASE_DIR / "input_stock"
+DOWNLOAD_DIR = BASE_DIR / "download"
 DATA_DIR = BASE_DIR / "data"
 STOCK_PRICE_DIR = DATA_DIR / "stock_price"
 
 def process_downloaded_stocks():
     # Input and output directories
-    input_dir = "download"
-    data_dir = "data"
     create_folder(DATA_DIR)
     # Subdirectory for Date and Price data
-     
-     
     create_folder(STOCK_PRICE_DIR)
 
     # Initialize an empty list to collect all summaries
     all_summaries = []
 
     # Loop through all CSV files in the `download` directory
-    for filename in os.listdir(input_dir):
+    for filename in os.listdir(DOWNLOAD_DIR):
         if filename.endswith(".csv"):  # Process only CSV files
-            file_path = os.path.join(input_dir, filename)
+            file_path = os.path.join(DOWNLOAD_DIR, filename)
             stock_id = filename.split(".")[0]  # Extract stock ID from filename
 
             # Load CSV file into a DataFrame
@@ -40,7 +36,7 @@ def process_downloaded_stocks():
             # Extract Date and Price columns and save to a separate file for each stock
             if 'Date' in df.columns and 'Price' in df.columns:
                 date_price_df = df[['Date', 'Price', 'PER']].dropna(subset=['Date', 'Price', 'PER'])
-                output_file = date_price_dir / f"{stock_id}.csv"
+                output_file = STOCK_PRICE_DIR / f"{stock_id}.csv"
                 save_to_csv(date_price_df, output_file, False)
                 # date_price_df.to_csv(output_file, index=False)
                 # print(f"Date and Price data for {stock_id} saved to {output_file}")
@@ -97,7 +93,7 @@ def process_downloaded_stocks():
     print("###########################################################################################################################")
     
     # Save the combined summary to a CSV file
-    output_file = Path(data_dir) / "process_data.csv"
+    output_file = Path(DATA_DIR) / "process_data.csv"
     save_to_csv(summary_df, output_file, False)
 
 

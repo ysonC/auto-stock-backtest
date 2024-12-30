@@ -2,6 +2,12 @@ import pandas as pd
 import os
 from helpers import *
 
+BASE_DIR = Path(__file__).resolve().parent
+INPUT_DIR = BASE_DIR / "input_stock"
+DOWNLOAD_DIR = BASE_DIR / "download"
+DATA_DIR = BASE_DIR / "data"
+STOCK_PRICE_DIR = DATA_DIR / "stock_price"
+
 def backtest_MR(data, weeks, median_per):
     """
     Perform a backtest for Median Reversion (MR) success rates.
@@ -40,8 +46,7 @@ def process_stocks():
     - output_file_path (str): Path to save the final backtested data.
     """
     # Define path
-    stock_folder_path = "data/stock_price"
-    create_folder(stock_folder_path)
+    create_folder(STOCK_PRICE_DIR)
     process_data_path = "data/process_data.csv"
     output_file_path = "data/backtest_MR_data.csv"
     
@@ -50,10 +55,10 @@ def process_stocks():
     result_list = []
 
     # Loop through each stock file in the folder
-    for stock_file in os.listdir(stock_folder_path):
+    for stock_file in os.listdir(STOCK_PRICE_DIR):
         if stock_file.endswith(".csv"):
             stock_id = stock_file.split(".")[0]
-            stock_file_path = os.path.join(stock_folder_path, stock_file)
+            stock_file_path = os.path.join(STOCK_PRICE_DIR, stock_file)
 
             # Load the stock CSV
             stock_data_df = read_csv(stock_file_path)

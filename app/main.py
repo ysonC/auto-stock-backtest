@@ -3,6 +3,7 @@ import sys
 import os
 import shutil
 from pathlib import Path
+from halo import Halo
 from app import download_chromedriver, download_stock_data, read_stock_numbers_from_file, process_downloaded_stocks, process_stocks
 
 def check_chromedriver():
@@ -37,7 +38,7 @@ def get_stock_and_date():
     choice = input("Enter your choice (1, 2, or 3): ").strip()
 
     if choice == "1":
-        # Collect stock IDs from all files in the input_stock directory
+        print("Loading stock IDs from input files...")
         stock_numbers = []
         for file in input_dir.iterdir():
             if file.is_file():
@@ -67,38 +68,50 @@ def get_stock_and_date():
     print(f"Total stock IDs loaded: {len(stock_numbers)}")
     print(stock_numbers)
     print("----------------------------------------------------")
-    return stock_numbers
-
-def replace_directory(path):
-    """"Check and remove old diectory for fresh start"""
-    if os.path.exists(path):
-        shutil.rmtree(path)
-    Path(path).mkdir(parents=True, exist_ok=True)        
+    return stock_numbers       
         
-
 def main():
+    print("Starting the main workflow...")
     check_chromedriver()
     
     # Input for stock numbers and start date
-    stock_numbers= get_stock_and_date()
+    print("Getting stock numbers and start date...")
+    stock_numbers = get_stock_and_date()
+
+    print("")
+    # Step 1: Run the download script with a spinner
+    spinner = Halo(text='Step 1: Downloading stock data...', spinner='line', color='cyan')
+    spinner.start()
+    try:
+        download_stock_data(stock_numbers)
+        spinner.succeed("Stock data downloaded successfully.")
+    except Exception as e:
+        spinner.fail(f"Failed to download stock data: {e}")
+        print(f"Exception during stock data download: {e}")
     
-    # Step 1: Run the download script
-    print("Step 1: Downloads stock data.")
-    print("Running download.py...")
-    download_stock_data(stock_numbers)
-    print("----------------------------------------------------")
-
-    # Step 2: Run the clean stocks script
-    print("Step 2: Processes and clean data.")
-    print("Running clean_data.py...")
-    process_downloaded_stocks()
-    print("----------------------------------------------------")
-
-    # Step 3: Run the MR backtest script
-    print("Step 3: Performs MR backtesting on the processed data.")
-    print("Running backtest_MR.py...")
-    process_stocks()
-    print("----------------------------------------------------")
+    print("")
+    # Step 2: Run the clean stocks script with a spinner
+    spinner = Halo(text='Step 2: Cleaning and processing data...', spinner='line', color='cyan')
+    spinner.start()
+    try:
+        process_downloaded_stocks()
+        spinner.succeed("Data cleaned and processed successfully.")
+    except Exception as e:
+        spinner.fail(f"Failed to clean and process data: {e}")
+        print(f"Exception during data cleaning and processing: {e}")
+    
+    print("")
+    # Step 3: Run the MR backtest script with a spinner
+    spinner = Halo(text='Step 3: Performing MR backtesting...', spinner='line', color='cyan')
+    spinner.start()
+    try:
+        print("Calling process_stocks...")
+        process_stocks()
+        spinner.succeed("MR backtesting completed successfully.")
+    except Exception as e:
+        spinner.fail(f"Failed to perform MR backtesting: {e}")
+        print(f"Exception during MR backtesting: {e}")
 
 if __name__ == "__main__":
+    print("Executing main function...")
     main()

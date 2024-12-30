@@ -12,7 +12,8 @@ setup(
         "pandas",
         "selenium",
         "beautifulsoup4",
-        "tqdm"
+        "tqdm",
+        "halo"
     ],
     entry_points={
         "console_scripts": [

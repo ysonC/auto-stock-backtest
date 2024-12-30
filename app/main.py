@@ -39,6 +39,7 @@ def get_stock_and_date():
     print("2. Generate a template file in 'input_stock' directory")
     print("3. Exit")
     choice = input("Enter your choice (1, 2, or 3): ").strip()
+    print("")
     
     spinner = Halo(text='Loading stock IDs from input files...', spinner='line', color='cyan')
     spinner.start()
@@ -54,20 +55,20 @@ def get_stock_and_date():
                 except Exception as e:
                     print(f"Error reading file {file.name}: {e}")
         if not stock_numbers:
-            print(f"No valid stock IDs found in 'input_stock' directory.")
+            spinner.fail("No valid stock IDs found in 'input_stock' directory. Try running with option 2 to generate a template file.")
             sys.exit(1)
     elif choice == "2":
         template_file = input_dir / "stock_numbers.txt"
         with open(template_file, "w") as file:
             file.write("2303\n")
             file.write("2330\n")
-        print(f"Template file created: {template_file}")
+        spinner.succeed(f"Template file created: {template_file}")
         sys.exit(0)
     elif choice == "3":
-        print("Program exiting. . .")
+        spinner.succeed("Program exiting. . .")
         sys.exit(0)
     else:
-        print("Invalid choice. Exiting.")
+        spinner.fail("Invalid choice. Exiting.")
         sys.exit(1)
 
     spinner.succeed("Stocks loaded successfully.")

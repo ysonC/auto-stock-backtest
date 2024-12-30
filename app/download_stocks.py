@@ -5,6 +5,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import WebDriverException
 from bs4 import BeautifulSoup
 from pathlib import Path
 from halo import Halo
@@ -96,22 +97,19 @@ def download_stock_data(stock_numbers):
                 save_to_csv(df, output_file_path, False)
                 spinner.succeed(f"Stock {stock_number} downloaded successfully.")
 
-            except Exception as e:
-                spinner.fail(f"Error while processing stock {stock_number}: {e}")
+            except WebDriverException as e:
+                spinner.fail(f"Error while processing stock {stock_number}: {e.msg}")
                 error_stocks.append(stock_number)  # Add stock number to error list
 
     finally:
         # Print any errors
         if error_stocks:
             print(f"Error stock numbers: {error_stocks}")
-
         # Close the browser
         driver.quit()
     spinner = Halo(text=f"Processing stock: {stock_number} ({index}/{total_stocks})", spinner='line', color='cyan')
     spinner.start()
-    spinner.succeed(f"All stocks downloaded successfully.")
-
-    
+    spinner.succeed(f"Downloaded ({total_stocks - len(error_stocks)}/{total_stocks}) stocks successfully.")
 
 # Example usage
 if __name__ == "__main__":

@@ -17,7 +17,7 @@ BASE_DIR = Path(__file__).resolve().parent
 INPUT_DIR = BASE_DIR / "input_stock"
 DOWNLOAD_DIR = BASE_DIR / "download"
 DATA_DIR = BASE_DIR / "data"
-STOCK_PRICE_DIR = DATA_DIR / "stock_price"
+STOCK_DATA_DIR = DATA_DIR / "stock_data"
 
 def read_stock_numbers_from_file(file_path):
     """Reads stock numbers from a text file."""

@@ -6,7 +6,7 @@ BASE_DIR = Path(__file__).resolve().parent
 INPUT_DIR = BASE_DIR / "input_stock"
 DOWNLOAD_DIR = BASE_DIR / "download"
 DATA_DIR = BASE_DIR / "data"
-STOCK_PRICE_DIR = DATA_DIR / "stock_price"
+STOCK_DATA_DIR = DATA_DIR / "stock_data"
 PROCESS_DATA_PATH = DATA_DIR / "process_data.csv"
 OUTPUT_DATA_PATH = DATA_DIR / "backtest_MR_data.csv"
 
@@ -48,17 +48,17 @@ def process_stocks():
     - output_file_path (str): Path to save the final backtested data.
     """
     
-    create_folder(STOCK_PRICE_DIR)
+    create_folder(STOCK_DATA_DIR)
     
     # Load process_data.xlsx
     process_data_df = read_csv(PROCESS_DATA_PATH)
     result_list = []
 
     # Loop through each stock file in the folder
-    for stock_file in os.listdir(STOCK_PRICE_DIR):
+    for stock_file in os.listdir(STOCK_DATA_DIR):
         if stock_file.endswith(".csv"):
             stock_id = stock_file.split(".")[0]
-            stock_file_path = os.path.join(STOCK_PRICE_DIR, stock_file)
+            stock_file_path = os.path.join(STOCK_DATA_DIR, stock_file)
 
             # Load the stock CSV
             stock_data_df = read_csv(stock_file_path)

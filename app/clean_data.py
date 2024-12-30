@@ -6,13 +6,13 @@ from .helpers import *
 BASE_DIR = Path(__file__).resolve().parent
 DOWNLOAD_DIR = BASE_DIR / "download"
 DATA_DIR = BASE_DIR / "data"
-STOCK_PRICE_DIR = DATA_DIR / "stock_price"
+STOCK_DATA_DIR = DATA_DIR / "stock_data"
 
 def process_downloaded_stocks():
     # Input and output directories
     create_folder(DATA_DIR)
     # Subdirectory for Date and Price data
-    create_folder(STOCK_PRICE_DIR)
+    create_folder(STOCK_DATA_DIR)
 
     # Initialize an empty list to collect all summaries
     all_summaries = []
@@ -36,7 +36,7 @@ def process_downloaded_stocks():
             # Extract Date and Price columns and save to a separate file for each stock
             if 'Date' in df.columns and 'Price' in df.columns:
                 date_price_df = df[['Date', 'Price', 'PER']].dropna(subset=['Date', 'Price', 'PER'])
-                output_file = STOCK_PRICE_DIR / f"{stock_id}.csv"
+                output_file = STOCK_DATA_DIR / f"{stock_id}.csv"
                 save_to_csv(date_price_df, output_file, False)
                 # date_price_df.to_csv(output_file, index=False)
                 # print(f"Date and Price data for {stock_id} saved to {output_file}")

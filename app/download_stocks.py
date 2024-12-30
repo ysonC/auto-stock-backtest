@@ -9,15 +9,60 @@ from selenium.common.exceptions import WebDriverException
 from bs4 import BeautifulSoup
 from pathlib import Path
 from halo import Halo
-import os
 from datetime import datetime
 from .helpers import *
-from .config import DOWNLOAD_DIR, CHROMEDRIVER_PATH
+from .config import DOWNLOAD_DIR, CHROMEDRIVER_PATH, STOCK_DATA_DIR
 
 def read_stock_numbers_from_file(file_path):
     """Reads stock numbers from a text file."""
     with open(file_path, 'r', encoding='utf-8') as f:
         return [line.strip() for line in f if line.strip()]
+    
+def parse_custom_date(custom_date):
+    """Converts custom date format (24W52) to a standard YYYY-MM-DD format."""
+    try:
+        # Extract year and week from the custom date
+        year = int("20" + custom_date[:2])  # Assumes year is 20XX
+        week = int(custom_date[3:])  # Extract the week number
+
+        # Convert to a standard date (Monday of the given week)
+        return datetime.strptime(f"{year}-W{week}-1", "%Y-W%U-%w")
+    except Exception as e:
+        print(f"Error parsing date '{custom_date}': {e}")
+        return None
+
+def is_stock_data_up_to_date(stock_number):
+    """Check if the stock data exists, contains valid data, and is up-to-date."""
+    stock_file = Path(STOCK_DATA_DIR) / f"{stock_number}.csv"
+    if not stock_file.exists():
+        return False  # File does not exist, download needed
+
+    try:
+        # Load the CSV and check if it contains valid data
+        df = pd.read_csv(stock_file)
+        if df.empty:
+            return False  # File is empty, download needed
+
+        # Parse the custom date column
+        df['ParsedDate'] = df['Date'].apply(parse_custom_date)
+        if df['ParsedDate'].isnull().all():
+            return False  # No valid dates found, download needed
+
+        # Get the latest date in the file
+        latest_date_in_file = df['ParsedDate'].max()
+
+        # Get the current date
+        current_date = datetime.now()
+
+        # Check if the latest date in the file is earlier than today
+        if latest_date_in_file < current_date:
+            return False  # Data is outdated, download needed
+
+        return True  # Data is valid and up-to-date
+    except Exception as e:
+        print(f"Error reading {stock_file}: {e}")
+        return False  # Any error means we need to re-download
+
 
 def download_stock_data(stock_numbers):
     start_date = "2001-03-28"
@@ -25,9 +70,7 @@ def download_stock_data(stock_numbers):
     end_date = datetime.now().strftime("%Y-%m-%d")  # Format: YYYY-MM-DD
 
     # Configuration
-    chromedriver_path = os.path.join(os.getcwd(), "setup/chromedriver")
-    download_dir = DOWNLOAD_DIR
-    Path(download_dir).mkdir(exist_ok=True)  # Ensure download directory exists
+    create_folder(DOWNLOAD_DIR)
 
     # Chrome options
     chrome_options = Options()
@@ -36,7 +79,7 @@ def download_stock_data(stock_numbers):
     chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument("--disable-gpu")
     prefs = {
-        "download.default_directory": str(Path(download_dir).resolve()),
+        "download.default_directory": str(Path(DOWNLOAD_DIR).resolve()),
         "download.prompt_for_download": False,
         "download.directory_upgrade": True,
         "safebrowsing.enabled": True,
@@ -87,7 +130,7 @@ def download_stock_data(stock_numbers):
                         data.append(cells)
 
                 # Save data to a CSV file using pandas
-                output_file_path = Path(download_dir) / f"{stock_number}.csv"
+                output_file_path = Path(DOWNLOAD_DIR) / f"{stock_number}.csv"
                 df = pd.DataFrame(data, columns=header)
                 save_to_csv(df, output_file_path, False)
                 spinner.succeed(f"Stock {stock_number} downloaded successfully.")
@@ -105,6 +148,28 @@ def download_stock_data(stock_numbers):
     spinner = Halo(text=f"Processing stock: {stock_number} ({index}/{total_stocks})", spinner='line', color='cyan')
     spinner.start()
     spinner.succeed(f"Downloaded ({total_stocks - len(error_stocks)}/{total_stocks}) stocks successfully.")
+
+def check_and_download_stocks(stock_numbers):
+    """Check stocks and download only if needed."""
+    stocks_to_download = []
+
+    spinner = Halo(text='Checking to update stock data...', spinner='line', color='cyan')
+    spinner.start()
+    for stock_number in stock_numbers:
+        if not is_stock_data_up_to_date(stock_number):
+            stocks_to_download.append(stock_number)
+        # else:
+        #     print(f"Stock {stock_number} is already up to date.")
+    if len(stocks_to_download) == 0:
+        spinner.succeed("All stocks are up to date. No download needed.")
+    else:
+        spinner.warn(f"Found {len(stocks_to_download)} stocks to download.")    
+
+    if stocks_to_download:
+        # print(f"Downloading data for {len(stocks_to_download)} stocks: {stocks_to_download}")
+        download_stock_data(stocks_to_download)
+    # else:
+    #     print("All stocks are up to date. No download needed.")
 
 # Example usage
 if __name__ == "__main__":

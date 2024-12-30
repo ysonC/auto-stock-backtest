@@ -3,13 +3,25 @@ from pathlib import Path
 from halo import Halo
 from app import (
     download_chromedriver, 
-    download_stock_data, 
     read_stock_numbers_from_file, 
+    check_and_download_stocks,
     process_downloaded_stocks, 
-    process_stocks, 
-    CHROMEDRIVER_PATH
+    process_stocks,
+    create_folder,
+    CHROMEDRIVER_PATH,
+    DATA_DIR,
+    INPUT_STOCK_DIR,
+    RESULTS_DIR,
+    STOCK_DATA_DIR,
+    DOWNLOAD_DIR,
+    RESOURCES_DIR
     )
 
+def check_all_folders():
+    """Check if all necessary folders exist."""
+    folders = [DATA_DIR, INPUT_STOCK_DIR, RESULTS_DIR, STOCK_DATA_DIR, DOWNLOAD_DIR, RESOURCES_DIR]
+    for folder in folders:
+        create_folder(folder)
 
 def check_chromedriver():
     """Check if ChromeDriver is installed and accessible."""
@@ -66,23 +78,27 @@ def get_stock_numbers():
 
 
 def main():
+    # Check if all necessary folders exist
+    check_all_folders()
+    
     # Input for stock numbers and start date
     stock_numbers = get_stock_numbers()
     print(f"Total stock IDs loaded: {len(stock_numbers)}")
     print(stock_numbers)
     print("")
     
+    # Step 0: Check if chromedriver is available
     spinner = Halo(text='Checking chromedriver...',
                    spinner='line', color='cyan')
     spinner.start()
     check_chromedriver()
     spinner.succeed("Chromedriver found.")
-
     print("")
+    
     # Step 1: Run the download script with a spinner
-    download_stock_data(stock_numbers)
-
+    check_and_download_stocks(stock_numbers)
     print("")
+    
     # Step 2: Run the clean stocks script with a spinner
     spinner = Halo(text='Cleaning and processing data...',
                    spinner='line', color='cyan')
@@ -94,8 +110,8 @@ def main():
     except Exception as e:
         spinner.fail(f"Failed to clean and process data: {e}")
         print(f"Exception during data cleaning and processing: {e}")
-
     print("")
+    
     # Step 3: Run the MR backtest script with a spinner
     spinner = Halo(text='Step 3: Performing MR backtesting...',
                    spinner='line', color='cyan')
@@ -108,8 +124,8 @@ def main():
     except Exception as e:
         spinner.fail(f"Failed to perform MR backtesting: {e}")
         print(f"Exception during MR backtesting: {e}")
-    
     print("")
+    
     spinner = Halo(text='..', spinner='none', color='cyan')
     spinner.start()
     spinner.succeed("Program completed successfully.")

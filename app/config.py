@@ -11,7 +11,7 @@ DATA_DIR = APP_DIR / "data"
 STOCK_DATA_DIR = DATA_DIR / "stock_data"
 RESULTS_DIR = DATA_DIR / "results"
 DOWNLOAD_DIR = APP_DIR / "download"
-RESOURCES_DIR = BASE_DIR.parent / "resources"  # Ensure it's pointing to the correct location
+RESOURCES_DIR = BASE_DIR.parent / "resources"
 INPUT_STOCK_DIR = BASE_DIR.parent / "input_stock"
 
 # Paths to specific files

@@ -6,4 +6,4 @@ input_stock
 chromedriver
 .DS_Store
 auto_stock_backtest.egg-info/
-!data/stock_data/
+!data/stock_data

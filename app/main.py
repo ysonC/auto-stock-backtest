@@ -75,15 +75,18 @@ def get_stock_and_date():
 
 
 def main():
-    
-    check_chromedriver()
-
     # Input for stock numbers and start date
-    print("Getting stock numbers and start date...")
     stock_numbers = get_stock_and_date()
     print(f"Total stock IDs loaded: {len(stock_numbers)}")
     print(stock_numbers)
+    print("")
     
+    spinner = Halo(text='Checking chromedriver...',
+                   spinner='line', color='cyan')
+    spinner.start()
+    check_chromedriver()
+    spinner.succeed("Chromedriver found.")
+
     print("")
     # Step 1: Run the download script with a spinner
     download_stock_data(stock_numbers)

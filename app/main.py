@@ -39,9 +39,12 @@ def get_stock_and_date():
     print("2. Generate a template file in 'input_stock' directory")
     print("3. Exit")
     choice = input("Enter your choice (1, 2, or 3): ").strip()
-
+    
+    spinner = Halo(text='Loading stock IDs from input files...', spinner='line', color='cyan')
+    spinner.start()
+    
     if choice == "1":
-        print("Loading stock IDs from input files...")
+        # print("Loading stock IDs from input files...")
         stock_numbers = []
         for file in input_dir.iterdir():
             if file.is_file():
@@ -67,21 +70,20 @@ def get_stock_and_date():
         print("Invalid choice. Exiting.")
         sys.exit(1)
 
-    print("----------------------------------------------------")
-    print(f"Total stock IDs loaded: {len(stock_numbers)}")
-    print(stock_numbers)
-    print("----------------------------------------------------")
+    spinner.succeed("Stocks loaded successfully.")
     return stock_numbers
 
 
 def main():
-    print("Starting the main workflow...")
+    
     check_chromedriver()
 
     # Input for stock numbers and start date
     print("Getting stock numbers and start date...")
     stock_numbers = get_stock_and_date()
-
+    print(f"Total stock IDs loaded: {len(stock_numbers)}")
+    print(stock_numbers)
+    
     print("")
     # Step 1: Run the download script with a spinner
     download_stock_data(stock_numbers)
@@ -92,8 +94,9 @@ def main():
                    spinner='line', color='cyan')
     spinner.start()
     try:
-        process_downloaded_stocks()
+        processed_df = process_downloaded_stocks()
         spinner.succeed("Data cleaned and processed successfully.")
+        print(processed_df)
     except Exception as e:
         spinner.fail(f"Failed to clean and process data: {e}")
         print(f"Exception during data cleaning and processing: {e}")
@@ -105,13 +108,17 @@ def main():
     spinner.start()
     try:
         # print("Calling process_stocks...")
-        process_stocks()
+        result_df = process_stocks()
         spinner.succeed("MR backtesting completed successfully.")
+        print(result_df)
     except Exception as e:
         spinner.fail(f"Failed to perform MR backtesting: {e}")
         print(f"Exception during MR backtesting: {e}")
-
+    
+    print("")
+    spinner = Halo(text='..', spinner='none', color='cyan')
+    spinner.start()
+    spinner.succeed("Program completed successfully.")
 
 if __name__ == "__main__":
-    print("Executing main function...")
     main()

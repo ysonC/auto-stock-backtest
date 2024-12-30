@@ -88,13 +88,14 @@ def process_downloaded_stocks():
 
     # Convert all summaries to a DataFrame
     summary_df = pd.DataFrame(all_summaries)
-    print("###########################################################################################################################")
-    print(summary_df)
-    print("###########################################################################################################################")
+    # print("###########################################################################################################################")
+    # print(summary_df)
+    # print("###########################################################################################################################")
     
     # Save the combined summary to a CSV file
     output_file = Path(DATA_DIR) / "process_data.csv"
     save_to_csv(summary_df, output_file, False)
+    return summary_df
 
 
 if __name__ == "__main__":

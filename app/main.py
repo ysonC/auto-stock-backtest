@@ -6,6 +6,7 @@ from pathlib import Path
 from halo import Halo
 from app import download_chromedriver, download_stock_data, read_stock_numbers_from_file, process_downloaded_stocks, process_stocks
 
+
 def check_chromedriver():
     """Check if ChromeDriver is installed and accessible."""
     chromedriver_path = Path("setup/chromedriver")
@@ -13,6 +14,7 @@ def check_chromedriver():
         print("ChromeDriver not found in 'setup/' directory.")
         print("Installing ChromeDriver. . .")
         download_chromedriver()
+
 
 def run_script(script_name, args=None):
     """Run a Python script with optional arguments."""
@@ -24,6 +26,7 @@ def run_script(script_name, args=None):
         print(f"Error running {script_name}: {result.stderr}")
     else:
         print(result.stdout)
+
 
 def get_stock_and_date():
     """Get stock numbers either manually or by reading all files in the 'input_stock' directory."""
@@ -44,7 +47,7 @@ def get_stock_and_date():
             if file.is_file():
                 try:
                     with open(file, "r") as f:
-                        stock_numbers = read_stock_numbers_from_file(file)     
+                        stock_numbers = read_stock_numbers_from_file(file)
                 except Exception as e:
                     print(f"Error reading file {file.name}: {e}")
         if not stock_numbers:
@@ -68,30 +71,25 @@ def get_stock_and_date():
     print(f"Total stock IDs loaded: {len(stock_numbers)}")
     print(stock_numbers)
     print("----------------------------------------------------")
-    return stock_numbers       
-        
+    return stock_numbers
+
+
 def main():
     print("Starting the main workflow...")
     check_chromedriver()
-    
+
     # Input for stock numbers and start date
     print("Getting stock numbers and start date...")
     stock_numbers = get_stock_and_date()
 
     print("")
     # Step 1: Run the download script with a spinner
-    spinner = Halo(text='Step 1: Downloading stock data...', spinner='line', color='cyan')
-    spinner.start()
-    try:
-        download_stock_data(stock_numbers)
-        spinner.succeed("Stock data downloaded successfully.")
-    except Exception as e:
-        spinner.fail(f"Failed to download stock data: {e}")
-        print(f"Exception during stock data download: {e}")
-    
+    download_stock_data(stock_numbers)
+
     print("")
     # Step 2: Run the clean stocks script with a spinner
-    spinner = Halo(text='Step 2: Cleaning and processing data...', spinner='line', color='cyan')
+    spinner = Halo(text='Cleaning and processing data...',
+                   spinner='line', color='cyan')
     spinner.start()
     try:
         process_downloaded_stocks()
@@ -99,18 +97,20 @@ def main():
     except Exception as e:
         spinner.fail(f"Failed to clean and process data: {e}")
         print(f"Exception during data cleaning and processing: {e}")
-    
+
     print("")
     # Step 3: Run the MR backtest script with a spinner
-    spinner = Halo(text='Step 3: Performing MR backtesting...', spinner='line', color='cyan')
+    spinner = Halo(text='Step 3: Performing MR backtesting...',
+                   spinner='line', color='cyan')
     spinner.start()
     try:
-        print("Calling process_stocks...")
+        # print("Calling process_stocks...")
         process_stocks()
         spinner.succeed("MR backtesting completed successfully.")
     except Exception as e:
         spinner.fail(f"Failed to perform MR backtesting: {e}")
         print(f"Exception during MR backtesting: {e}")
+
 
 if __name__ == "__main__":
     print("Executing main function...")

@@ -47,7 +47,7 @@ def save_to_csv(dataframe, file_path, index=False):
         file_path.parent.mkdir(parents=True, exist_ok=True)  # Ensure the parent directory exists
         
         dataframe.to_csv(file_path, index=index, encoding="utf-8")
-        print(f"Data successfully saved to {file_path.resolve()}")
+        # print(f"Data successfully saved to {file_path.resolve()}")
     except Exception as e:
         print(f"Error saving CSV file to {file_path}: {e}")
 

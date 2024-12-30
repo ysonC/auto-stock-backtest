@@ -7,7 +7,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
 from pathlib import Path
-from tqdm import tqdm
+from halo import Halo
 import os
 from datetime import datetime
 from .helpers import *
@@ -17,7 +17,6 @@ INPUT_DIR = BASE_DIR / "input_stock"
 DOWNLOAD_DIR = BASE_DIR / "download"
 DATA_DIR = BASE_DIR / "data"
 STOCK_PRICE_DIR = DATA_DIR / "stock_price"
-
 
 def read_stock_numbers_from_file(file_path):
     """Reads stock numbers from a text file."""
@@ -58,52 +57,48 @@ def download_stock_data(stock_numbers):
     error_stocks = []  # List to store stocks causing errors
 
     try:
-        # Progress bar for downloading multiple stocks
         total_stocks = len(stock_numbers)
-        with tqdm(total=total_stocks, desc="Downloading Stocks", unit="stock") as pbar:
-            for index, stock_number in enumerate(stock_numbers, start=1):
-                try:
-                    print(f"[{index}/{total_stocks}] Processing stock: {stock_number}")
+        for index, stock_number in enumerate(stock_numbers, start=1):
+            spinner = Halo(text=f"Processing stock: {stock_number} ({index}/{total_stocks})", spinner='line', color='cyan')
+            spinner.start()
+            try:
+                # Reset cookies
+                driver.delete_all_cookies()
 
-                    # Reset cookies
-                    driver.delete_all_cookies()
-                    
-                    # Open the webpage
-                    url = f"https://goodinfo.tw/tw/ShowK_ChartFlow.asp?RPT_CAT=PER&STEP=DATA&STOCK_ID={stock_number}&CHT_CAT=WEEK&PRICE_ADJ=F&START_DT={start_date}&END_DT={end_date}"
-                    driver.get(url)
-                    
-                    # Wait for the table to load
-                    WebDriverWait(driver, 10).until(
-                        lambda d: d.find_element(By.ID, "tblDetail")
-                    )
+                # Open the webpage
+                url = f"https://goodinfo.tw/tw/ShowK_ChartFlow.asp?RPT_CAT=PER&STEP=DATA&STOCK_ID={stock_number}&CHT_CAT=WEEK&PRICE_ADJ=F&START_DT={start_date}&END_DT={end_date}"
+                driver.get(url)
 
-                    # Use JavaScript to fetch the table's innerHTML
-                    table_html = driver.execute_script(
-                        "return document.getElementById('tblDetail').innerHTML"
-                    )
+                # Wait for the table to load
+                WebDriverWait(driver, 10).until(
+                    lambda d: d.find_element(By.ID, "tblDetail")
+                )
 
-                    # Parse the table with BeautifulSoup
-                    soup = BeautifulSoup(table_html, "html.parser")
-                    rows = soup.find_all("tr")
+                # Use JavaScript to fetch the table's innerHTML
+                table_html = driver.execute_script(
+                    "return document.getElementById('tblDetail').innerHTML"
+                )
 
-                    # Extract data rows, skipping header
-                    data = []
-                    for row in rows[1:]:  # Skip header row
-                        cells = [cell.get_text(strip=True) for cell in row.find_all("td") if cell.get_text(strip=True)]
-                        if cells:
-                            data.append(cells)
+                # Parse the table with BeautifulSoup
+                soup = BeautifulSoup(table_html, "html.parser")
+                rows = soup.find_all("tr")
 
-                    # Save data to a CSV file using pandas
-                    output_file_path = Path(download_dir) / f"{stock_number}.csv"
-                    df = pd.DataFrame(data, columns=header)
-                    save_to_csv(df, output_file_path, False)
+                # Extract data rows, skipping header
+                data = []
+                for row in rows[1:]:  # Skip header row
+                    cells = [cell.get_text(strip=True) for cell in row.find_all("td") if cell.get_text(strip=True)]
+                    if cells:
+                        data.append(cells)
 
-                except Exception as e:
-                    print(f"Error while processing stock {stock_number}: {e}")
-                    error_stocks.append(stock_number)  # Add stock number to error list
+                # Save data to a CSV file using pandas
+                output_file_path = Path(download_dir) / f"{stock_number}.csv"
+                df = pd.DataFrame(data, columns=header)
+                save_to_csv(df, output_file_path, False)
+                spinner.succeed(f"Stock {stock_number} downloaded successfully.")
 
-                # Update progress bar
-                pbar.update(1)
+            except Exception as e:
+                spinner.fail(f"Error while processing stock {stock_number}: {e}")
+                error_stocks.append(stock_number)  # Add stock number to error list
 
     finally:
         # Print any errors
@@ -112,9 +107,11 @@ def download_stock_data(stock_numbers):
 
         # Close the browser
         driver.quit()
-    print("####################################")
-    print("#### All stock data downloaded! ####")
-    print("####################################")
+    spinner = Halo(text=f"Processing stock: {stock_number} ({index}/{total_stocks})", spinner='line', color='cyan')
+    spinner.start()
+    spinner.succeed(f"All stocks downloaded successfully.")
+
+    
 
 # Example usage
 if __name__ == "__main__":

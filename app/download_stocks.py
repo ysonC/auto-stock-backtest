@@ -10,7 +10,7 @@ from pathlib import Path
 from tqdm import tqdm
 import os
 from datetime import datetime
-from helpers import *
+from .helpers import *
 
 BASE_DIR = Path(__file__).resolve().parent
 INPUT_DIR = BASE_DIR / "input_stock"

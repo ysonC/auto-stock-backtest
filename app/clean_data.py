@@ -1,7 +1,7 @@
 import pandas as pd
 from pathlib import Path
 import os
-from helpers import *
+from .helpers import *
 
 BASE_DIR = Path(__file__).resolve().parent
 DOWNLOAD_DIR = BASE_DIR / "download"

@@ -3,9 +3,17 @@ import sys
 import os
 import shutil
 from pathlib import Path
-from download_stocks import *
-from clean_data import *
-from backtest_MR import *
+from app import download_stock_data, read_stock_numbers_from_file, process_downloaded_stocks, process_stocks
+
+def check_chromedriver():
+    """Check if ChromeDriver is installed and accessible."""
+    chromedriver_path = Path("setup/chromedriver")
+    if not chromedriver_path.exists():
+        print("Error: ChromeDriver not found in 'setup/' directory.")
+        print("Please install ChromeDriver before proceeding.")
+        sys.exit(1)
+    else:
+        print("ChromeDriver is installed and accessible.")
 
 def run_script(script_name, args=None):
     """Run a Python script with optional arguments."""
@@ -27,6 +35,7 @@ def get_stock_and_date():
     print("Choose input method for stock numbers:")
     print("1. Load all stock IDs and date from files in 'input_stock' directory")
     print("2. Generate a template file in 'input_stock' directory")
+    print("3. Exit")
     choice = input("Enter your choice (1 or 2): ").strip()
 
     if choice == "1":
@@ -49,6 +58,9 @@ def get_stock_and_date():
             file.write("2330\n")
         print(f"Template file created: {template_file}")
         sys.exit(0)
+    elif choice == "3":
+        print("Program exiting. . .")
+        sys.exit(0)
     else:
         print("Invalid choice. Exiting.")
         sys.exit(1)
@@ -67,6 +79,8 @@ def replace_directory(path):
         
 
 def main():
+    check_chromedriver()
+
     # Ensure the required directories exist
     download_dir = Path("download")
     data_dir = Path("data/stock")

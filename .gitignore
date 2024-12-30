@@ -5,3 +5,4 @@ input_stock
 .venv
 chromedriver
 .DS_Store
+auto_stock_backtest.egg-info/

@@ -82,7 +82,7 @@ if __name__ == "__main__":
         print(f"Temporary directory created: {temp_dir}")
 
         # Step 1: Set up Python environment
-        setup_environment()
+        # setup_environment()
 
         # Step 2: Install Chrome and ChromeDriver
         install_chrome_and_chromedriver(temp_dir)

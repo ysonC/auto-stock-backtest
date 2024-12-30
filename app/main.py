@@ -3,7 +3,6 @@ import sys
 import os
 import shutil
 from pathlib import Path
-from temp.download import download_stock_data
 from download_stocks import *
 from clean_data import *
 from backtest_MR import *
@@ -28,7 +27,7 @@ def get_stock_and_date():
     print("Choose input method for stock numbers:")
     print("1. Load all stock IDs and date from files in 'input_stock' directory")
     print("2. Generate a template file in 'input_stock' directory")
-    choice = input("Enter your choice (1, 2, or 3): ").strip()
+    choice = input("Enter your choice (1 or 2): ").strip()
 
     if choice == "1":
         # Collect stock IDs from all files in the input_stock directory

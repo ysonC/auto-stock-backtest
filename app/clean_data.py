@@ -3,14 +3,20 @@ from pathlib import Path
 import os
 from helpers import *
 
+BASE_DIR = Path(__file__).resolve().parent
+INPUT_DIR = BASE_DIR / "input_stock"
+DATA_DIR = BASE_DIR / "data"
+STOCK_PRICE_DIR = DATA_DIR / "stock_price"
+
 def process_downloaded_stocks():
     # Input and output directories
     input_dir = "download"
     data_dir = "data"
-    create_folder(data_dir)
+    create_folder(DATA_DIR)
     # Subdirectory for Date and Price data
-    date_price_dir = Path(data_dir) / "stock_price"
-    create_folder(date_price_dir)
+     
+     
+    create_folder(STOCK_PRICE_DIR)
 
     # Initialize an empty list to collect all summaries
     all_summaries = []

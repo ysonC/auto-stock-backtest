@@ -5,12 +5,18 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from bs4 import BeautifulSoup  # For parsing HTML efficiently
+from bs4 import BeautifulSoup
 from pathlib import Path
 from tqdm import tqdm
 import os
-from datetime import datetime  # For dynamic date
+from datetime import datetime
 from helpers import *
+
+BASE_DIR = Path(__file__).resolve().parent
+INPUT_DIR = BASE_DIR / "input_stock"
+DATA_DIR = BASE_DIR / "data"
+STOCK_PRICE_DIR = DATA_DIR / "stock_price"
+
 
 def read_stock_numbers_from_file(file_path):
     """Reads stock numbers from a text file."""
@@ -24,7 +30,7 @@ def download_stock_data(stock_numbers):
 
     # Configuration
     chromedriver_path = os.path.join(os.getcwd(), "setup/chromedriver")
-    download_dir = "download"
+    download_dir = DOWNLOAD_DIR
     Path(download_dir).mkdir(exist_ok=True)  # Ensure download directory exists
 
     # Chrome options

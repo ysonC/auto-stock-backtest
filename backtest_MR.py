@@ -30,7 +30,7 @@ def backtest_MR(data, weeks, median_per):
     return success_rate
 
 
-def process_stocks(process_data_path, stock_folder_path, output_file_path):
+def process_stocks():
     """
     Process all stocks for backtesting Median Reversion (MR) success rates.
 
@@ -39,6 +39,12 @@ def process_stocks(process_data_path, stock_folder_path, output_file_path):
     - stock_folder_path (str): Path to the folder containing stock CSV files.
     - output_file_path (str): Path to save the final backtested data.
     """
+    # Define path
+    stock_folder_path = "data/stock_price"
+    create_folder(stock_folder_path)
+    process_data_path = "data/process_data.csv"
+    output_file_path = "data/backtest_MR_data.csv"
+    
     # Load process_data.xlsx
     process_data_df = read_csv(process_data_path)
     result_list = []
@@ -58,9 +64,9 @@ def process_stocks(process_data_path, stock_folder_path, output_file_path):
             stock_data_df = stock_data_df.iloc[::-1].reset_index(drop=True)
 
             # Filter the process_data_df for the current stock
-            stock_row = process_data_df[process_data_df["Stock ID"] == stock_file]
+            stock_row = process_data_df[process_data_df["Stock ID"].astype(str) == stock_id]
             if stock_row.empty:
-                print(f"No matching stock ID for {stock_file} in process_data.xlsx.")
+                print(f"No matching stock ID for {stock_file} in process_data.csv.")
                 continue
 
             # Extract necessary values
@@ -94,14 +100,10 @@ def process_stocks(process_data_path, stock_folder_path, output_file_path):
     # Convert results to DataFrame and save
     result_df = pd.DataFrame(result_list)
     save_to_csv(result_df, output_file_path, False)
+    print("###########################################################################################")
+    print(result_df)
+    print("###########################################################################################")
 
 
 if __name__ == "__main__":
-    # Define paths
-    stock_folder_path = "data/stock_price"
-    create_folder(stock_folder_path)
-    process_data_path = "data/process_data.csv"
-    output_file_path = "data/backtest_MR_data.csv"
-
-    # Process stocks
-    process_stocks(process_data_path, stock_folder_path, output_file_path)
+    process_stocks()

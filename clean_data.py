@@ -3,7 +3,6 @@ from pathlib import Path
 import os
 from helpers import *
 
-
 def process_downloaded_stocks():
     # Input and output directories
     input_dir = "download"
@@ -20,7 +19,7 @@ def process_downloaded_stocks():
     for filename in os.listdir(input_dir):
         if filename.endswith(".csv"):  # Process only CSV files
             file_path = os.path.join(input_dir, filename)
-            stock_id = filename.split("_")[0]  # Extract stock ID from filename
+            stock_id = filename.split(".")[0]  # Extract stock ID from filename
 
             # Load CSV file into a DataFrame
             df = read_csv(file_path)
@@ -35,9 +34,10 @@ def process_downloaded_stocks():
             # Extract Date and Price columns and save to a separate file for each stock
             if 'Date' in df.columns and 'Price' in df.columns:
                 date_price_df = df[['Date', 'Price', 'PER']].dropna(subset=['Date', 'Price', 'PER'])
-                output_file = date_price_dir / f"{stock_id}"
-                date_price_df.to_csv(output_file, index=False)
-                print(f"Date and Price data for {stock_id} saved to {output_file}")
+                output_file = date_price_dir / f"{stock_id}.csv"
+                save_to_csv(date_price_df, output_file, False)
+                # date_price_df.to_csv(output_file, index=False)
+                # print(f"Date and Price data for {stock_id} saved to {output_file}")
 
             # Calculate required values
             df['Price'] = pd.to_numeric(df['Price'], errors='coerce')

@@ -3,7 +3,10 @@ import sys
 import os
 import shutil
 from pathlib import Path
-from download import download_stock_data
+from temp.download import download_stock_data
+from download_stocks import *
+from clean_data import *
+from backtest_MR import *
 
 def run_script(script_name, args=None):
     """Run a Python script with optional arguments."""
@@ -23,35 +26,26 @@ def get_stock_and_date():
     input_dir.mkdir(parents=True, exist_ok=True)
 
     print("Choose input method for stock numbers:")
-    print("1. Enter manually")
-    print("2. Load all stock IDs and date from files in 'input_stock' directory")
-    print("3. Generate a template file in 'input_stock' directory")
+    print("1. Load all stock IDs and date from files in 'input_stock' directory")
+    print("2. Generate a template file in 'input_stock' directory")
     choice = input("Enter your choice (1, 2, or 3): ").strip()
 
     if choice == "1":
-        stock_numbers = input("Enter a comma-separated list of stock IDs: ").split(",")
-    elif choice == "2":
         # Collect stock IDs from all files in the input_stock directory
         stock_numbers = []
-        start_date = ""
         for file in input_dir.iterdir():
             if file.is_file():
                 try:
                     with open(file, "r") as f:
-                        item = [line.strip() for line in f if line.strip()]
-                        start_date = item[0]
-                        stock_item = item[1:]
-                        stock_numbers.extend(stock_item)
-                        # print(f"Loaded {len(file_stock_numbers)} stock IDs from {file.name}")
+                        stock_numbers = read_stock_numbers_from_file(file)     
                 except Exception as e:
                     print(f"Error reading file {file.name}: {e}")
         if not stock_numbers:
             print(f"No valid stock IDs found in 'input_stock' directory.")
             sys.exit(1)
-    elif choice == "3":
-        template_file = input_dir / "template_stock_ids.txt"
+    elif choice == "2":
+        template_file = input_dir / "stock_numbers.txt"
         with open(template_file, "w") as file:
-            file.write("2020-01-01\n")
             file.write("2303\n")
             file.write("2330\n")
         print(f"Template file created: {template_file}")
@@ -61,11 +55,10 @@ def get_stock_and_date():
         sys.exit(1)
 
     print("----------------------------------------------------")
-    print(f"Start date selected: {start_date}")
     print(f"Total stock IDs loaded: {len(stock_numbers)}")
     print(stock_numbers)
     print("----------------------------------------------------")
-    return stock_numbers, start_date
+    return stock_numbers
 
 def replace_directory(path):
     """"Check and remove old diectory for fresh start"""
@@ -82,30 +75,24 @@ def main():
     replace_directory(data_dir)
     
     # Input for stock numbers and start date
-    stock_numbers, start_date = get_stock_and_date()
+    stock_numbers= get_stock_and_date()
     
     # Step 1: Run the download script
     print("Step 1: Downloads stock data.")
     print("Running download.py...")
-    download_stock_data(stock_numbers, start_date)
+    download_stock_data(stock_numbers)
     print("----------------------------------------------------")
 
-    # Step 2: Run the extract_data script
-    print("Step 2: Extracts the required data from downloaded files.")
-    print("Running extract_data.py...")
-    run_script("extract_data.py")
+    # Step 2: Run the clean stocks script
+    print("Step 2: Processes and clean data.")
+    print("Running clean_data.py...")
+    process_downloaded_stocks()
     print("----------------------------------------------------")
 
-    # Step 3: Run the process script
-    print("Step 3: Processes and analyzes the data.")
-    print("Running process.py...")
-    run_script("process.py")
-    print("----------------------------------------------------")
-
-    # Step 4: Run the backtest script
-    print("Step 4: Performs backtesting on the processed data.")
-    print("Running backtest.py...")
-    run_script("backtest.py")
+    # Step 3: Run the MR backtest script
+    print("Step 3: Performs MR backtesting on the processed data.")
+    print("Running backtest_MR.py...")
+    process_stocks()
     print("----------------------------------------------------")
 
 if __name__ == "__main__":

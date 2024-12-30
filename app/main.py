@@ -3,17 +3,15 @@ import sys
 import os
 import shutil
 from pathlib import Path
-from app import download_stock_data, read_stock_numbers_from_file, process_downloaded_stocks, process_stocks
+from app import download_chromedriver, download_stock_data, read_stock_numbers_from_file, process_downloaded_stocks, process_stocks
 
 def check_chromedriver():
     """Check if ChromeDriver is installed and accessible."""
     chromedriver_path = Path("setup/chromedriver")
     if not chromedriver_path.exists():
-        print("Error: ChromeDriver not found in 'setup/' directory.")
-        print("Please install ChromeDriver before proceeding.")
-        sys.exit(1)
-    else:
-        print("ChromeDriver is installed and accessible.")
+        print("ChromeDriver not found in 'setup/' directory.")
+        print("Installing ChromeDriver. . .")
+        download_chromedriver()
 
 def run_script(script_name, args=None):
     """Run a Python script with optional arguments."""
@@ -36,7 +34,7 @@ def get_stock_and_date():
     print("1. Load all stock IDs and date from files in 'input_stock' directory")
     print("2. Generate a template file in 'input_stock' directory")
     print("3. Exit")
-    choice = input("Enter your choice (1 or 2): ").strip()
+    choice = input("Enter your choice (1, 2, or 3): ").strip()
 
     if choice == "1":
         # Collect stock IDs from all files in the input_stock directory

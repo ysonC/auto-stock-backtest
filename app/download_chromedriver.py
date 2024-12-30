@@ -67,10 +67,7 @@ def install_chrome_and_chromedriver(temp_dir):
     os.remove(chromedriver_zip)
     shutil.rmtree(os.path.join(temp_dir, f"chromedriver-{os_key}"))
 
-
-if __name__ == "__main__":
-    print("### Setup and Run Script ###")
-
+def download_chromedriver():
     # Check system compatibility
     os_name = platform.system()
     if os_name not in ["Linux", "Darwin"]:
@@ -89,3 +86,7 @@ if __name__ == "__main__":
 
         # Temporary directory and its contents are automatically deleted here
         print(f"Temporary directory {temp_dir} deleted.")
+    print("")
+
+if __name__ == "__main__":
+    download_chromedriver()

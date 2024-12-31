@@ -129,7 +129,7 @@ def download_stock_data(stock_numbers):
 
 def check_and_download_stocks(stock_numbers):
     logging.info("Checking and downloading stocks as needed.")
-    spinner = Halo(text="Checking stock data...", spinner='dots', color='cyan')
+    spinner = Halo(text="Checking stock data...", spinner='line', color='cyan')
     spinner.start()
     stocks_to_download = [s for s in stock_numbers if not is_stock_data_up_to_date(s)]
   

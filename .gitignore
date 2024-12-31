@@ -6,4 +6,4 @@ chromedriver
 .DS_Store
 auto_stock_backtest.egg-info/
 app/data
-app.log
+app.log*

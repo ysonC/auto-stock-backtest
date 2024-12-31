@@ -89,7 +89,6 @@ def clean_downloaded_stocks(stock_numbers):
         median_delta = (latest_per - median_per) / (max_per - min_per) if all([latest_per, median_per, max_per, min_per]) else None
         mean_delta = (latest_per - mean_per) / (max_per - min_per) if all([latest_per, mean_per, max_per, min_per]) else None
         min_delta = (latest_per - min_per) / (max_per - min_per) if all([latest_per, min_per, max_per, min_per]) else None
-        median_price = (median_per / latest_per) * latest_closing_price if all([median_per, latest_per, latest_closing_price]) else None
 
         # Create a summary for this stock
         summary = {

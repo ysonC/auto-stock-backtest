@@ -96,20 +96,6 @@ To run the entire workflow, execute the main script:
 4. **Data Cleaning**: Extracts relevant metrics and processes data.
 5. **Backtesting**: Performs median reversion analysis and generates reports.
 
-### Running Individual Scripts
-
-- **Download Stock Data**: 
-   ```bash
-   python download_stocks.py
-   ```
-- **Clean Data**:
-   ```bash
-   python clean_data.py
-   ```
-- **Perform Backtesting**:
-   ```bash
-   python backtest.py
-   ```
 
 ### Key Configuration
 

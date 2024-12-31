@@ -13,21 +13,21 @@ Automate the process of downloading, processing, and analyzing stock data to per
    python3 -m venv .venv
    source .venv/bin/activate
    ```
-
+![Venv](resources/venv.gif)
 ### 2. Run automated setup script
 
 1. Run:
    ```bash
    pip install -e .
    ```
-
+![Pip install](resources/pipinstall.gif)
 ### 3. Run the program
 
 1. Starting up the program
    ```bash
    run
    ```
-
+![run](resources/demo.gif)
 ---
 
 ## Manual Installation

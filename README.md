@@ -8,7 +8,7 @@ This project automates the downloading, cleaning, and analysis of stock data to 
 
 ### 1. Set Up Python Environment
 
-1. Create and activate virtual environment:
+Create and activate virtual environment:
    ```bash
    python3 -m venv .venv
    source .venv/bin/activate
@@ -16,7 +16,7 @@ This project automates the downloading, cleaning, and analysis of stock data to 
 ![Venv](resources/venv.gif)
 ### 2. Run automated setup script
 
-1. Run:
+Run:
    ```bash
    pip install -e .
    ```
@@ -26,7 +26,7 @@ This project automates the downloading, cleaning, and analysis of stock data to 
 
 ### 1. Set Up Python Environment
 
-1. Create a virtual environment for Python packages:
+Create a virtual environment for Python packages:
    ```bash
    python3 -m venv .venv
    source .venv/bin/activate

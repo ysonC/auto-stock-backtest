@@ -23,7 +23,7 @@ def backtest_MR(data, weeks, median_per):
 
     # Convert PER to numeric and drop NaN values
     data['PER'] = pd.to_numeric(data['PER'], errors='coerce')
-    data = data.dropna(subset=['PER'])
+    # data = data.dropna(subset=['PER'])
 
     for i in range(len(data) - weeks):
         enter_PER = data["PER"].iloc[i]

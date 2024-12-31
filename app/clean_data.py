@@ -55,7 +55,7 @@ def clean_downloaded_stocks(stock_numbers):
 
         # Extract and save Date, Price, and PER columns
         if 'Date' in df.columns and 'Price' in df.columns and 'PER' in df.columns:
-            date_price_df = df[['Date', 'Price', 'PER']].dropna(subset=['Date', 'Price', 'PER'])
+            date_price_df = df[['Date', 'Price', 'PER']]
             output_file = Path(STOCK_DATA_DIR) / f"{stock_id}.csv"
             save_to_csv(date_price_df, output_file, False)
             logging.info(f"Extracted and saved Date, Price, PER for {stock_id} to {output_file}.")

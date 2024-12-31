@@ -4,6 +4,8 @@ import logging
 from .helpers import *
 from .config import PROCESS_DATA_PATH, STOCK_DATA_DIR, OUTPUT_DATA_PATH
 
+NaN_THRESHOLD = 0.2
+
 def backtest_MR(data, weeks, median_per):
     """
     Perform a backtest for Median Reversion (MR) success rates.
@@ -21,10 +23,16 @@ def backtest_MR(data, weeks, median_per):
     total_under_median = 0
     total_improve_median = 0
 
-    # Convert PER to numeric and drop NaN values
+    # Convert PER to numeric
     data['PER'] = pd.to_numeric(data['PER'], errors='coerce')
-    # data = data.dropna(subset=['PER'])
+    total_NaN = 0
+    total_NaN = data['PER'].isna().sum()
 
+    # Check if NaN values exceed the threshold
+    if total_NaN / len(data) > NaN_THRESHOLD:
+        logging.warning(f"NaN values exceed the threshold of {NaN_THRESHOLD * 100}%. Returning NaN.")
+        return float('nan')
+    
     for i in range(len(data) - weeks):
         enter_PER = data["PER"].iloc[i]
         if enter_PER > median_per:

@@ -1,8 +1,8 @@
----
+
+
 # Stock Backtest Automation
 
-Automate the process of downloading, processing, and analyzing stock data to perform backtesting with Python scripts.
----
+This project automates the downloading, cleaning, and analysis of stock data to perform backtesting using Python. It provides modular scripts for different tasks like data extraction, cleaning, backtesting, and reporting.
 
 ## Installation
 
@@ -21,14 +21,6 @@ Automate the process of downloading, processing, and analyzing stock data to per
    pip install -e .
    ```
 ![Pip install](resources/pipinstall.gif)
-### 3. Run the program
-
-1. Starting up the program
-   ```bash
-   run
-   ```
-![run](resources/demo.gif)
----
 
 ## Manual Installation
 
@@ -75,35 +67,70 @@ Automate the process of downloading, processing, and analyzing stock data to per
    chromedriver_path = "/your-path/auto-stock-backtest/chromedriver"
    ```
 
----
 
 ## Usage
 
 ### Running the Main Script
 
 To run the entire workflow, execute the main script:
+   ```bash
+   run
+   ```
+![run](resources/demo.gif)
 
-```bash
-python main.py
-```
 
-### Main Script Workflow
+## Features
 
-1. Downloads stock data (`download.py`).
-2. Extracts the required data from downloaded files (`extract_data.py`).
-3. Processes and analyzes the data (`process.py`).
-4. Performs backtesting on the processed data (`backtest.py`).
+- **Stock Data Download**: Automated downloading of stock data using Selenium and ChromeDriver.
+- **Data Cleaning and Processing**: Extracts relevant metrics and performs validation.
+- **Backtesting**: Median reversion success rate analysis based on historical stock data.
+- **Logging**: Configurable logging for debugging and runtime analysis.
+- **Modular Workflow**: Scripts can be executed independently or as part of a pipeline.
 
-### Running Scripts Independently
 
-You can run each script independently:
+### Script Workflow
 
-- **Extract Data**: `extract_data.py`
-- **Process Data**: `process.py`
-- **Backtest**: `backtest.py`
+1. **Folder Setup**: Ensures required directories are available.
+2. **Stock Data Input**: Reads stock IDs from the `input_stock/` directory.
+3. **Data Download**: Fetches stock data from the web.
+4. **Data Cleaning**: Extracts relevant metrics and processes data.
+5. **Backtesting**: Performs median reversion analysis and generates reports.
 
----
+### Running Individual Scripts
 
-### Notes
+- **Download Stock Data**: 
+   ```bash
+   python download_stocks.py
+   ```
+- **Clean Data**:
+   ```bash
+   python clean_data.py
+   ```
+- **Perform Backtesting**:
+   ```bash
+   python backtest.py
+   ```
 
----
+### Key Configuration
+
+Paths and constants can be adjusted in `config.py`.
+
+
+## Files and Structure
+
+- **`main.py`**: Entry point for the pipeline.
+- **`download_stocks.py`**: Automates the stock data download process.
+- **`clean_data.py`**: Cleans and validates downloaded stock data.
+- **`backtest.py`**: Implements median reversion analysis.
+- **`logging_config.py`**: Configures logging levels and formats.
+- **`config.py`**: Central configuration for paths and constants.
+- **`helpers.py`**: Utility functions for file operations and processing.
+- **`download_chromedriver.py`**: Automates ChromeDriver setup.
+
+
+## Notes
+
+1. Ensure your `input_stock/stock_numbers.txt` file contains valid stock IDs.
+2. Debug mode can be enabled by running scripts with the `debug` argument.
+3. Logging output is available in `app.log`.
+

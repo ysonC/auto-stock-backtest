@@ -1,7 +1,6 @@
 import sys
 from pathlib import Path
 from halo import Halo
-from logging_config import setup_logging
 import logging
 from app import (
     download_chromedriver,
@@ -10,6 +9,8 @@ from app import (
     clean_downloaded_stocks,
     process_stocks,
     create_folder,
+    setup_logging,
+    log_separator,
     CHROMEDRIVER_PATH,
     DATA_DIR,
     INPUT_STOCK_DIR,
@@ -18,8 +19,6 @@ from app import (
     DOWNLOAD_DIR,
     RESOURCES_DIR
 )
-
-setup_logging()
 
 def check_all_folders():
     """Check if all necessary folders exist."""
@@ -93,6 +92,12 @@ def get_stock_numbers():
 
 
 def main():
+    debug_mode = len(sys.argv) > 1 and sys.argv[1] == "debug"
+    setup_logging(debug_mode=debug_mode)
+    log_separator()
+    if debug_mode:
+        logging.info("Debug mode enabled. All logs will be displayed in the terminal.")
+
     logging.info("Starting the application.")
     
     # Step 0: Check if all necessary folders exist
@@ -145,6 +150,8 @@ def main():
 
 
 if __name__ == "__main__":
+
+    
     logging.info("Program execution started.")
     try:
         main()

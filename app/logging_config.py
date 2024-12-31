@@ -1,29 +1,46 @@
 import logging
 from logging.handlers import RotatingFileHandler
 
-def setup_logging(log_file="app.log", level=logging.WARNING):
+def setup_logging(log_file="app.log", file_level=logging.DEBUG, debug_mode=False):
     """
-    Configure logging for the application.
+    Configure logging to log into a file and optionally display all logs in the terminal.
 
     Args:
     - log_file (str): Path to the log file.
-    - level (int): Logging level (e.g., logging.DEBUG, logging.INFO).
+    - file_level (int): Logging level for the file handler.
+    - debug_mode (bool): If True, enable debug-level logs in the terminal.
     """
     # Define the log format
     log_format = "%(asctime)s [%(levelname)s] %(message)s"
+    # Suppress Selenium logs
+    selenium_logger = logging.getLogger('selenium.webdriver.remote.remote_connection')
+    selenium_logger.setLevel(logging.WARNING)  # Suppress DEBUG and INFO logs
 
-    # Create a rotating file handler
+
+    # File handler for detailed logging
     file_handler = RotatingFileHandler(log_file, maxBytes=5 * 1024 * 1024, backupCount=3)
     file_handler.setFormatter(logging.Formatter(log_format))
+    file_handler.setLevel(file_level)
 
-    # Create a console handler
-    console_handler = logging.StreamHandler()
-    console_handler.setFormatter(logging.Formatter(log_format))
+    # Configure logging handlers
+    handlers = [file_handler]
 
-    # Configure the root logger
-    logging.basicConfig(
-        level=level,
-        handlers=[file_handler, console_handler]
-    )
+    # Add console handler in debug mode
+    if debug_mode:
+        console_handler = logging.StreamHandler()
+        console_handler.setFormatter(logging.Formatter(log_format))
+        console_handler.setLevel(logging.DEBUG)
+        handlers.append(console_handler)
 
-    logging.info("Logging is set up successfully.")
+    # Clear existing handlers
+    logging.root.handlers.clear()
+
+    # Set up logging with the configured handlers
+    logging.basicConfig(level=logging.DEBUG, handlers=handlers)
+    
+def log_separator():
+    """
+    Log a separator to mark the beginning of a new script execution.
+    """
+    logging.info("\n" + "-" * 80)
+

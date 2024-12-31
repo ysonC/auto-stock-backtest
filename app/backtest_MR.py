@@ -1,5 +1,6 @@
 import pandas as pd
 import os
+import logging
 from .helpers import *
 from .config import PROCESS_DATA_PATH, STOCK_DATA_DIR, OUTPUT_DATA_PATH
 
@@ -15,15 +16,15 @@ def backtest_MR(data, weeks, median_per):
     Returns:
     - success_rate (float): Success rate as a percentage.
     """
-    
+    logging.info(f"Starting backtest for {weeks} weeks with median PER: {median_per}")
+
     total_under_median = 0
     total_improve_median = 0
-    
+
     # Convert PER to numeric and drop NaN values
     data['PER'] = pd.to_numeric(data['PER'], errors='coerce')
-    # Drop rows with NaN PER values
     data = data.dropna(subset=['PER'])
-    
+
     for i in range(len(data) - weeks):
         enter_PER = data["PER"].iloc[i]
         if enter_PER > median_per:
@@ -34,6 +35,7 @@ def backtest_MR(data, weeks, median_per):
             total_improve_median += 1
 
     success_rate = (total_improve_median / total_under_median * 100) if total_under_median > 0 else 0
+    logging.info(f"Backtest completed. Success rate: {success_rate:.2f}%")
     return success_rate
 
 def process_stocks(stock_numbers):
@@ -43,26 +45,32 @@ def process_stocks(stock_numbers):
     Args:
     - stock_numbers (list): List of stock numbers to process.
     """
-    
+    logging.info(f"Processing stocks: {stock_numbers}")
+
     create_folder(STOCK_DATA_DIR)
-    
-    # Load process_data.xlsx
+
+    # Load process_data.csv
     process_data_df = read_csv(PROCESS_DATA_PATH)
+    if process_data_df is None:
+        logging.error("Failed to read process_data.csv. Exiting.")
+        return
+
     result_list = []
 
     # Loop through each stock number
     for stock_id in stock_numbers:
+        logging.info(f"Processing stock: {stock_id}")
         stock_file_path = os.path.join(STOCK_DATA_DIR, f"{stock_id}.csv")
-        
+
         # Check if stock file exists
         if not os.path.exists(stock_file_path):
-            print(f"Stock file for {stock_id} not found in {STOCK_DATA_DIR}. Skipping.")
+            logging.warning(f"Stock file for {stock_id} not found in {STOCK_DATA_DIR}. Skipping.")
             continue
 
         # Load the stock CSV
         stock_data_df = read_csv(stock_file_path)
         if stock_data_df is None:
-            print(f"Failed to read data for stock {stock_id}. Skipping.")
+            logging.error(f"Failed to read data for stock {stock_id}. Skipping.")
             continue
 
         # Reverse data for chronological order
@@ -71,7 +79,7 @@ def process_stocks(stock_numbers):
         # Filter the process_data_df for the current stock
         stock_row = process_data_df[process_data_df["Stock ID"].astype(str) == stock_id]
         if stock_row.empty:
-            print(f"No matching stock ID for {stock_id} in process_data.csv. Skipping.")
+            logging.warning(f"No matching stock ID for {stock_id} in process_data.csv. Skipping.")
             continue
 
         # Extract necessary values
@@ -101,12 +109,19 @@ def process_stocks(stock_numbers):
             "3M MR": mr_3m,
             "Avg.": avg_mr
         })
+        logging.info(f"Processing for stock {stock_id} completed.")
 
     # Convert results to DataFrame and save
     result_df = pd.DataFrame(result_list)
     save_to_csv(result_df, OUTPUT_DATA_PATH, False)
+    logging.info(f"Results saved to {OUTPUT_DATA_PATH}.")
     return result_df
 
 if __name__ == "__main__":
+    logging.info("Script execution started.")
     stock_numbers = ["1213", "2330", "2303"]  # Example stock numbers
-    process_stocks(stock_numbers)
+    try:
+        process_stocks(stock_numbers)
+    except Exception as e:
+        logging.critical(f"Unhandled exception during processing: {e}", exc_info=True)
+    logging.info("Script execution finished.")

@@ -10,69 +10,71 @@ from bs4 import BeautifulSoup
 from pathlib import Path
 from halo import Halo
 from datetime import datetime
+import logging
 from .helpers import *
 from .config import DOWNLOAD_DIR, CHROMEDRIVER_PATH, STOCK_DATA_DIR
 
 def read_stock_numbers_from_file(file_path):
     """Reads stock numbers from a text file."""
-    with open(file_path, 'r', encoding='utf-8') as f:
-        return [line.strip() for line in f if line.strip()]
-    
+    logging.info(f"Reading stock numbers from file: {file_path}")
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            stock_numbers = [line.strip() for line in f if line.strip()]
+            logging.info(f"Loaded {len(stock_numbers)} stock numbers.")
+            return stock_numbers
+    except Exception as e:
+        logging.error(f"Error reading stock numbers from file {file_path}: {e}")
+        raise
+
 def parse_custom_date(custom_date):
     """Converts custom date format (24W52) to a standard YYYY-MM-DD format."""
     try:
-        # Extract year and week from the custom date
         year = int("20" + custom_date[:2])  # Assumes year is 20XX
         week = int(custom_date[3:])  # Extract the week number
-
-        # Convert to a standard date (Monday of the given week)
         return datetime.strptime(f"{year}-W{week}-1", "%Y-W%U-%w")
     except Exception as e:
-        print(f"Error parsing date '{custom_date}': {e}")
+        logging.warning(f"Error parsing date '{custom_date}': {e}")
         return None
 
 def is_stock_data_up_to_date(stock_number):
     """Check if the stock data exists, contains valid data, and is up-to-date."""
-    stock_file = Path(STOCK_DATA_DIR) / f"{stock_number}.csv"
+    stock_file = Path(DOWNLOAD_DIR) / f"{stock_number}.csv"
+    logging.info(f"Checking if stock data is up-to-date for stock: {stock_number}")
     if not stock_file.exists():
-        return False  # File does not exist, download needed
+        logging.info(f"Stock file {stock_file} does not exist. Download needed.")
+        return False
 
     try:
-        # Load the CSV and check if it contains valid data
         df = pd.read_csv(stock_file)
         if df.empty:
-            return False  # File is empty, download needed
+            logging.info(f"Stock file {stock_file} is empty. Download needed.")
+            return False
 
-        # Parse the custom date column
         df['ParsedDate'] = df['Date'].apply(parse_custom_date)
         if df['ParsedDate'].isnull().all():
-            return False  # No valid dates found, download needed
+            logging.info(f"No valid dates found in stock file {stock_file}. Download needed.")
+            return False
 
-        # Get the latest date in the file
         latest_date_in_file = df['ParsedDate'].max()
-
-        # Get the current date
         current_date = datetime.now()
 
-        # Check if the latest date in the file is earlier than today
         if latest_date_in_file < current_date:
-            return False  # Data is outdated, download needed
+            logging.info(f"Data in {stock_file} is outdated. Latest date: {latest_date_in_file}")
+            return False
 
-        return True  # Data is valid and up-to-date
+        logging.info(f"Stock data for {stock_number} is up-to-date.")
+        return True
     except Exception as e:
-        print(f"Error reading {stock_file}: {e}")
-        return False  # Any error means we need to re-download
-
+        logging.error(f"Error reading stock file {stock_file}: {e}")
+        return False
 
 def download_stock_data(stock_numbers):
+    logging.info("Starting stock data download.")
     start_date = "2001-03-28"
-    # Get today's date dynamically
-    end_date = datetime.now().strftime("%Y-%m-%d")  # Format: YYYY-MM-DD
+    end_date = datetime.now().strftime("%Y-%m-%d")
 
-    # Configuration
     create_folder(DOWNLOAD_DIR)
 
-    # Chrome options
     chrome_options = Options()
     chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
@@ -86,14 +88,11 @@ def download_stock_data(stock_numbers):
     }
     chrome_options.add_experimental_option("prefs", prefs)
 
-    # Initialize WebDriver
     service = Service(CHROMEDRIVER_PATH)
     driver = webdriver.Chrome(service=service, options=chrome_options)
 
-    # Hardcoded header
     header = ['Date', 'Price', 'Change', '% Change', 'EPS', 'PER', '8X', '9.8X', '11.6X', '13.4X', '15.2X', '17X']
-
-    error_stocks = []  # List to store stocks causing errors
+    error_stocks = []
 
     try:
         total_stocks = len(stock_numbers)
@@ -101,78 +100,54 @@ def download_stock_data(stock_numbers):
             spinner = Halo(text=f"Processing stock: {stock_number} ({index}/{total_stocks})", spinner='line', color='cyan')
             spinner.start()
             try:
-                # Reset cookies
                 driver.delete_all_cookies()
-
-                # Open the webpage
                 url = f"https://goodinfo.tw/tw/ShowK_ChartFlow.asp?RPT_CAT=PER&STEP=DATA&STOCK_ID={stock_number}&CHT_CAT=WEEK&PRICE_ADJ=F&START_DT={start_date}&END_DT={end_date}"
                 driver.get(url)
 
-                # Wait for the table to load
-                WebDriverWait(driver, 10).until(
-                    lambda d: d.find_element(By.ID, "tblDetail")
-                )
+                WebDriverWait(driver, 10).until(lambda d: d.find_element(By.ID, "tblDetail"))
+                table_html = driver.execute_script("return document.getElementById('tblDetail').innerHTML")
 
-                # Use JavaScript to fetch the table's innerHTML
-                table_html = driver.execute_script(
-                    "return document.getElementById('tblDetail').innerHTML"
-                )
-
-                # Parse the table with BeautifulSoup
                 soup = BeautifulSoup(table_html, "html.parser")
                 rows = soup.find_all("tr")
+                data = [[cell.get_text(strip=True) for cell in row.find_all("td")] for row in rows[1:] if row]
 
-                # Extract data rows, skipping header
-                data = []
-                for row in rows[1:]:  # Skip header row
-                    cells = [cell.get_text(strip=True) for cell in row.find_all("td") if cell.get_text(strip=True)]
-                    if cells:
-                        data.append(cells)
-
-                # Save data to a CSV file using pandas
                 output_file_path = Path(DOWNLOAD_DIR) / f"{stock_number}.csv"
                 df = pd.DataFrame(data, columns=header)
+                df = df.dropna(how='all')
                 save_to_csv(df, output_file_path, False)
+                logging.info(f"Downloaded and saved data for stock {stock_number} to {output_file_path}.")
                 spinner.succeed(f"Stock {stock_number} downloaded successfully.")
-
             except Exception as e:
-                spinner.fail(f"Error while processing stock {stock_number}: {e}")
-                error_stocks.append(stock_number)  # Add stock number to error list
-
+                spinner.fail(f"Error processing stock {stock_number}: {e}")
+                logging.error(f"Error downloading data for stock {stock_number}: {e}")
+                error_stocks.append(stock_number)
     finally:
-        # Print any errors
         if error_stocks:
-            print(f"Error stock numbers: {error_stocks}")
-        # Close the browser
+            logging.warning(f"Stocks with errors: {error_stocks}")
         driver.quit()
-    spinner = Halo(text=f"Processing stock: {stock_number} ({index}/{total_stocks})", spinner='line', color='cyan')
-    spinner.start()
-    spinner.succeed(f"Downloaded ({total_stocks - len(error_stocks)}/{total_stocks}) stocks successfully.")
+        logging.info("Download process completed.")
 
 def check_and_download_stocks(stock_numbers):
-    """Check stocks and download only if needed."""
-    stocks_to_download = []
-
-    spinner = Halo(text='Checking to update stock data...', spinner='line', color='cyan')
+    logging.info("Checking and downloading stocks as needed.")
+    spinner = Halo(text="Checking stock data...", spinner='dots', color='cyan')
     spinner.start()
-    for stock_number in stock_numbers:
-        if not is_stock_data_up_to_date(stock_number):
-            stocks_to_download.append(stock_number)
-        # else:
-        #     print(f"Stock {stock_number} is already up to date.")
-    if len(stocks_to_download) == 0:
-        spinner.succeed("All stocks are up to date. No download needed.")
-    else:
-        spinner.warn(f"Found {len(stocks_to_download)} stocks to download.")    
-
+    stocks_to_download = [s for s in stock_numbers if not is_stock_data_up_to_date(s)]
+  
     if stocks_to_download:
-        # print(f"Downloading data for {len(stocks_to_download)} stocks: {stocks_to_download}")
+        spinner.info(f"Stocks to download: {stocks_to_download}")
+        logging.info(f"Stocks to download: {stocks_to_download}")
         download_stock_data(stocks_to_download)
-    # else:
-    #     print("All stocks are up to date. No download needed.")
+    else:
+        spinner.succeed("All stocks checked, no download required.")
+        logging.info("All stocks are up-to-date.")
 
-# Example usage
 if __name__ == "__main__":
-    stock_file = "input_stock/stock_numbers.txt"  # Input file containing stock numbers
-    stock_numbers = read_stock_numbers_from_file(stock_file)
-    download_stock_data(stock_numbers)
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
+    logging.info("Script execution started.")
+    try:
+        stock_file = "input_stock/stock_numbers.txt"
+        stock_numbers = read_stock_numbers_from_file(stock_file)
+        check_and_download_stocks(stock_numbers)
+    except Exception as e:
+        logging.critical(f"Unhandled exception: {e}", exc_info=True)
+    logging.info("Script execution finished.")

@@ -36,15 +36,12 @@ def backtest_MR(data, weeks, median_per):
     success_rate = (total_improve_median / total_under_median * 100) if total_under_median > 0 else 0
     return success_rate
 
-
-def process_stocks():
+def process_stocks(stock_numbers):
     """
-    Process all stocks for backtesting Median Reversion (MR) success rates.
+    Process selected stocks for backtesting Median Reversion (MR) success rates.
 
     Args:
-    - process_data_path (str): Path to the process_data Excel file.
-    - stock_folder_path (str): Path to the folder containing stock CSV files.
-    - output_file_path (str): Path to save the final backtested data.
+    - stock_numbers (list): List of stock numbers to process.
     """
     
     create_folder(STOCK_DATA_DIR)
@@ -53,61 +50,63 @@ def process_stocks():
     process_data_df = read_csv(PROCESS_DATA_PATH)
     result_list = []
 
-    # Loop through each stock file in the folder
-    for stock_file in os.listdir(STOCK_DATA_DIR):
-        if stock_file.endswith(".csv"):
-            stock_id = stock_file.split(".")[0]
-            stock_file_path = os.path.join(STOCK_DATA_DIR, stock_file)
+    # Loop through each stock number
+    for stock_id in stock_numbers:
+        stock_file_path = os.path.join(STOCK_DATA_DIR, f"{stock_id}.csv")
+        
+        # Check if stock file exists
+        if not os.path.exists(stock_file_path):
+            print(f"Stock file for {stock_id} not found in {STOCK_DATA_DIR}. Skipping.")
+            continue
 
-            # Load the stock CSV
-            stock_data_df = read_csv(stock_file_path)
-            if stock_data_df is None:
-                continue
+        # Load the stock CSV
+        stock_data_df = read_csv(stock_file_path)
+        if stock_data_df is None:
+            print(f"Failed to read data for stock {stock_id}. Skipping.")
+            continue
 
-            # Reverse data for chronological order
-            stock_data_df = stock_data_df.iloc[::-1].reset_index(drop=True)
+        # Reverse data for chronological order
+        stock_data_df = stock_data_df.iloc[::-1].reset_index(drop=True)
 
-            # Filter the process_data_df for the current stock
-            stock_row = process_data_df[process_data_df["Stock ID"].astype(str) == stock_id]
-            if stock_row.empty:
-                print(f"No matching stock ID for {stock_file} in process_data.csv.")
-                continue
+        # Filter the process_data_df for the current stock
+        stock_row = process_data_df[process_data_df["Stock ID"].astype(str) == stock_id]
+        if stock_row.empty:
+            print(f"No matching stock ID for {stock_id} in process_data.csv. Skipping.")
+            continue
 
-            # Extract necessary values
-            current_price = stock_row["Price"].iloc[0]
-            current_per = stock_row["Current PER"].iloc[0]
-            median_per = stock_row["GEP MED"].iloc[0]
+        # Extract necessary values
+        current_price = stock_row["Price"].iloc[0]
+        current_per = stock_row["Current PER"].iloc[0]
+        median_per = stock_row["GEP MED"].iloc[0]
 
-            # Compute requested columns
-            median_price = (median_per / current_per) * current_price if current_per != 0 else None
-            mp_updown = (median_price - current_price) / current_price if current_price != 0 else None
+        # Compute requested columns
+        median_price = (median_per / current_per) * current_price if current_per != 0 else None
+        mp_updown = (median_price - current_price) / current_price if current_price != 0 else None
 
-            # Perform Median Reversion backtests
-            mr_1m = backtest_MR(stock_data_df, 4, median_per)
-            mr_2m = backtest_MR(stock_data_df, 8, median_per)
-            mr_3m = backtest_MR(stock_data_df, 12, median_per)
-            avg_mr = pd.Series([mr_1m, mr_2m, mr_3m]).mean()
+        # Perform Median Reversion backtests
+        mr_1m = backtest_MR(stock_data_df, 4, median_per)
+        mr_2m = backtest_MR(stock_data_df, 8, median_per)
+        mr_3m = backtest_MR(stock_data_df, 12, median_per)
+        avg_mr = pd.Series([mr_1m, mr_2m, mr_3m]).mean()
 
-            # Append the results to the list
-            result_list.append({
-                "Stock ID": stock_id,
-                "C$": current_price,
-                "M$": median_price,
-                "T$": "####",  # Leave blank
-                "MP UpDown": mp_updown,
-                "1M MR": mr_1m,
-                "2M MR": mr_2m,
-                "3M MR": mr_3m,
-                "Avg.": avg_mr
-            })
+        # Append the results to the list
+        result_list.append({
+            "Stock ID": stock_id,
+            "C$": current_price,
+            "M$": median_price,
+            "T$": "####",  # Leave blank
+            "MP UpDown": mp_updown,
+            "1M MR": mr_1m,
+            "2M MR": mr_2m,
+            "3M MR": mr_3m,
+            "Avg.": avg_mr
+        })
 
     # Convert results to DataFrame and save
     result_df = pd.DataFrame(result_list)
     save_to_csv(result_df, OUTPUT_DATA_PATH, False)
-    #print("###########################################################################################")
-    #print(result_df)
-    #print("###########################################################################################")
     return result_df
 
 if __name__ == "__main__":
-    process_stocks()
+    stock_numbers = ["1213", "2330", "2303"]  # Example stock numbers
+    process_stocks(stock_numbers)

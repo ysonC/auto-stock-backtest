@@ -4,9 +4,11 @@ import logging
 from .helpers import *
 from .config import PROCESS_DATA_PATH, STOCK_DATA_DIR, OUTPUT_DATA_PATH
 
+
+
 NaN_THRESHOLD = 0.2
 
-def backtest_MR(data, weeks, median_per):
+def median_reversion_calculation(data, weeks, median_per):
     """
     Perform a backtest for Median Reversion (MR) success rates.
 
@@ -42,9 +44,9 @@ def backtest_MR(data, weeks, median_per):
         if exit_PER < median_per and exit_PER > enter_PER:
             total_improve_median += 1
 
-    success_rate = (total_improve_median / total_under_median * 100) if total_under_median > 0 else 0
+    success_rate = (total_improve_median / total_under_median) if total_under_median > 0 else 0
     logging.info(f"Backtest completed. Success rate: {success_rate:.2f}%")
-    return success_rate
+    return success_rate, total_improve_median
 
 def process_stocks(stock_numbers):
     """
@@ -90,21 +92,29 @@ def process_stocks(stock_numbers):
             logging.warning(f"No matching stock ID for {stock_id} in process_data.csv. Skipping.")
             continue
 
-        # Extract necessary values
-        current_price = stock_row["Price"].iloc[0]
-        current_per = stock_row["Current PER"].iloc[0]
+        # S => Z information
         median_per = stock_row["GEP MED"].iloc[0]
-
-        # Compute requested columns
+        current_per = stock_row["Current PER"].iloc[0]
+        # S T V
+        current_price = stock_row["Price"].iloc[0]
         median_price = (median_per / current_per) * current_price if current_per != 0 else None
         mp_updown = (median_price - current_price) / current_price if current_price != 0 else None
 
         # Perform Median Reversion backtests
-        mr_1m = backtest_MR(stock_data_df, 4, median_per)
-        mr_2m = backtest_MR(stock_data_df, 8, median_per)
-        mr_3m = backtest_MR(stock_data_df, 12, median_per)
-        avg_mr = pd.Series([mr_1m, mr_2m, mr_3m]).mean()
+        # W X Y Z
+        MR_1_month, MR_cases_1_month = median_reversion_calculation(stock_data_df, 4, median_per)
+        MR_2_month, MR_cases_2_month = median_reversion_calculation(stock_data_df, 8, median_per)
+        MR_3_month, MR_cases_3_month = median_reversion_calculation(stock_data_df, 12, median_per)
+        avg_mr = pd.Series([MR_1_month, MR_2_month, MR_3_month]).mean()
 
+        # AB => AG
+        kelly = (avg_mr * (mp_updown + 1) - 1) / mp_updown if mp_updown != 0 else None
+        verdict =False
+        if mp_updown > 0 and avg_mr > 0.84:
+            verdict = True
+            
+        
+            
         # Append the results to the list
         result_list.append({
             "Stock ID": stock_id,
@@ -112,10 +122,17 @@ def process_stocks(stock_numbers):
             "M$": median_price,
             "T$": "####",  # Leave blank
             "MP UpDown": mp_updown,
-            "1M MR": mr_1m,
-            "2M MR": mr_2m,
-            "3M MR": mr_3m,
-            "Avg.": avg_mr
+            "1M MR": MR_1_month,
+            "2M MR": MR_2_month,
+            "3M MR": MR_3_month,
+            "Avg.": avg_mr,
+            "####": "####",  # Leave blank
+            "Kelly": kelly,
+            "Verdict": verdict,
+            "#####": "#####",  # Leave blank
+            "1M Incident": MR_cases_1_month,
+            "2M Incident": MR_cases_2_month,
+            "3M Incident": MR_cases_3_month
         })
         logging.info(f"Processing for stock {stock_id} completed.")
 

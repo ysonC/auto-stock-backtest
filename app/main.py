@@ -138,12 +138,12 @@ def main():
     spinner.start()
     try:
         result_df = process_stocks(stock_numbers)
-        spinner.succeed("MR backtesting completed.")
+        spinner.succeed("Backtesting completed.")
         print(result_df)
-        logging.info("MR backtesting completed successfully.")
+        logging.info("Backtesting completed successfully.")
     except Exception as e:
-        spinner.fail(f"Error in MR backtesting: {e}")
-        logging.error(f"Error during MR backtesting: {e}")
+        spinner.fail(f"Error in backtesting: {e}")
+        logging.error(f"Error during backtesting: {e}")
         sys.exit(1)
 
     logging.info("Program completed successfully.")

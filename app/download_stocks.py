@@ -135,8 +135,8 @@ def download_stock_data(stock_numbers):
                 save_to_csv(df, output_file_path, False)
                 spinner.succeed(f"Stock {stock_number} downloaded successfully.")
 
-            except WebDriverException as e:
-                spinner.fail(f"Error while processing stock {stock_number}: {e.msg}")
+            except Exception as e:
+                spinner.fail(f"Error while processing stock {stock_number}: {e}")
                 error_stocks.append(stock_number)  # Add stock number to error list
 
     finally:

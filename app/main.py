@@ -96,7 +96,7 @@ def main():
     print("")
     
     # Step 1: Run the download script with a spinner
-    # check_and_download_stocks(stock_numbers)
+    check_and_download_stocks(stock_numbers)
     print("")
     
     # Step 2: Run the clean stocks script with a spinner
@@ -113,17 +113,17 @@ def main():
     print("")
     
     # Step 3: Run the MR backtest script with a spinner
-    # spinner = Halo(text='Step 3: Performing MR backtesting...',
-    #                spinner='line', color='cyan')
-    # spinner.start()
-    # try:
-    #     # print("Calling process_stocks...")
-    result_df = process_stocks()
-    #     spinner.succeed("MR backtesting completed successfully.")
-    print(result_df)
-    # except Exception as e:
-    #     spinner.fail(f"Failed to perform MR backtesting: {e}")
-    #     print(f"Exception during MR backtesting: {e}")
+    spinner = Halo(text='Step 3: Performing MR backtesting...',
+                   spinner='line', color='cyan')
+    spinner.start()
+    try:
+        # print("Calling process_stocks...")
+        result_df = process_stocks()
+        spinner.succeed("MR backtesting completed successfully.")
+        print(result_df)
+    except Exception as e:
+        spinner.fail(f"Failed to perform MR backtesting: {e}")
+        print(f"Exception during MR backtesting: {e}")
     print("")
     
     spinner = Halo(text='..', spinner='none', color='cyan')

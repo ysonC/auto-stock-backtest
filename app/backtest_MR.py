@@ -15,9 +15,15 @@ def backtest_MR(data, weeks, median_per):
     Returns:
     - success_rate (float): Success rate as a percentage.
     """
+    
     total_under_median = 0
     total_improve_median = 0
-
+    
+    # Convert PER to numeric and drop NaN values
+    data['PER'] = pd.to_numeric(data['PER'], errors='coerce')
+    # Drop rows with NaN PER values
+    data = data.dropna(subset=['PER'])
+    
     for i in range(len(data) - weeks):
         enter_PER = data["PER"].iloc[i]
         if enter_PER > median_per:

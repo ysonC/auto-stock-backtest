@@ -106,7 +106,8 @@ def main():
     # Step 1: Get stock numbers
     stock_numbers = get_stock_numbers()
     print(f"Total stock IDs loaded: {len(stock_numbers)}")
-    print(stock_numbers)
+    if len(stock_numbers) <= 10:
+        print(stock_numbers)
 
     # Step 2: Check if chromedriver is available
     spinner = Halo(text='Checking ChromeDriver...', spinner='line', color='cyan')

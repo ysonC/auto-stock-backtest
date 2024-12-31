@@ -134,7 +134,10 @@ def check_and_download_stocks(stock_numbers):
     stocks_to_download = [s for s in stock_numbers if not is_stock_data_up_to_date(s)]
   
     if stocks_to_download:
-        spinner.info(f"Stocks to download: {stocks_to_download}")
+        if len(stocks_to_download) > 10:
+            spinner.info(f"{len(stocks_to_download)} Stocks to download")
+        else:
+            spinner.info(f"{len(stocks_to_download)} Stocks to download: {stocks_to_download}")
         logging.info(f"Stocks to download: {stocks_to_download}")
         download_stock_data(stocks_to_download)
     else:

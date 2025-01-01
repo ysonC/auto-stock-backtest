@@ -1,4 +1,4 @@
-from .download_chromedriver import download_chromedriver
+from .download_chromedriver import check_chromedriver
 from .download_stocks import download_stock_data, read_stock_numbers_from_file, check_and_download_stocks
 from .clean_data import clean_downloaded_stocks
 from .backtest import process_stocks
@@ -19,6 +19,7 @@ from .config import (
 
 __all__ = [
     "download_chromedriver",
+    "check_chromedriver",
     "download_stock_data",
     "read_stock_numbers_from_file",
     "check_and_download_stocks",

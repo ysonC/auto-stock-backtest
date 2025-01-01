@@ -118,7 +118,7 @@ def download_stock_data(stock_numbers):
                 logging.info(f"Downloaded and saved data for stock {stock_number} to {output_file_path}.")
                 spinner.succeed(f"Stock {stock_number} downloaded successfully.")
             except Exception as e:
-                spinner.fail(f"Error processing stock {stock_number}: {e}")
+                spinner.fail(f"Error processing stock {stock_number}")
                 logging.error(f"Error downloading data for stock {stock_number}: {e}")
                 error_stocks.append(stock_number)
     finally:

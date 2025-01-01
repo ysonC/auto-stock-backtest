@@ -3,7 +3,7 @@ from pathlib import Path
 from halo import Halo
 import logging
 from app import (
-    download_chromedriver,
+    check_chromedriver,
     read_stock_numbers_from_file,
     check_and_download_stocks,
     clean_downloaded_stocks,
@@ -27,16 +27,6 @@ def check_all_folders():
                STOCK_DATA_DIR, DOWNLOAD_DIR, RESOURCES_DIR]
     for folder in folders:
         create_folder(folder)
-
-
-def check_chromedriver():
-    """Check if ChromeDriver is installed and accessible."""
-    if not CHROMEDRIVER_PATH.exists():
-        logging.warning("ChromeDriver not found. Installing...")
-        download_chromedriver()
-        logging.info("ChromeDriver installed successfully.")
-    else:
-        logging.info("ChromeDriver is available.")
 
 
 def get_stock_numbers():

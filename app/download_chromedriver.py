@@ -6,7 +6,7 @@ import shutil
 import logging
 from tempfile import TemporaryDirectory
 import logging
-
+from .config import CHROMEDRIVER_PATH
 
 def run_command(command, description=None):
     """Run a system command and log its output."""
@@ -100,6 +100,15 @@ def download_chromedriver():
 
         logging.info(f"Temporary directory {temp_dir} deleted automatically.")
     logging.info("ChromeDriver setup completed successfully.")
+
+def check_chromedriver():
+    """Check if ChromeDriver is installed and accessible."""
+    if not CHROMEDRIVER_PATH.exists():
+        logging.warning("ChromeDriver not found. Installing...")
+        download_chromedriver()
+        logging.info("ChromeDriver installed successfully.")
+    else:
+        logging.info("ChromeDriver is available.")
 
 if __name__ == "__main__":
     logging.info("Script execution started.")

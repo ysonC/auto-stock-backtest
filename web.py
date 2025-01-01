@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify, render_template
-from app import check_and_download_stocks, clean_downloaded_stocks
+from app import check_and_download_stocks, clean_downloaded_stocks, check_chromedriver
 
 app = Flask(__name__)
 
@@ -15,6 +15,8 @@ def fetch_stock():
         return jsonify({'error': 'Stock number is required'}), 400
     
     try:
+        check_chromedriver()
+
         # Use the provided functions to check and download the stock
         check_and_download_stocks([stock_number])
         clean_result = clean_downloaded_stocks([stock_number])

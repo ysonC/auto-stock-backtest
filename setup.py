@@ -14,7 +14,8 @@ setup(
         "beautifulsoup4",
         "tqdm",
         "halo",
-        "flask"
+        "flask",
+        "gunicorn"
     ],
     entry_points={
         "console_scripts": [

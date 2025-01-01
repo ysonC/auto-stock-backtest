@@ -15,7 +15,6 @@ def fetch_stock():
         return jsonify({'error': 'Stock number is required'}), 400
     
     try:
-        check_chromedriver()
 
         # Use the provided functions to check and download the stock
         check_and_download_stocks([stock_number])

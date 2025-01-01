@@ -13,7 +13,8 @@ setup(
         "selenium",
         "beautifulsoup4",
         "tqdm",
-        "halo"
+        "halo",
+        "flask"
     ],
     entry_points={
         "console_scripts": [

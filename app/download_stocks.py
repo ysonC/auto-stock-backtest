@@ -103,7 +103,7 @@ def download_stock_data(stock_numbers):
                 url = f"https://goodinfo.tw/tw/ShowK_ChartFlow.asp?RPT_CAT=PER&STEP=DATA&STOCK_ID={stock_number}&CHT_CAT=WEEK&PRICE_ADJ=F&START_DT={start_date}&END_DT={end_date}"
                 driver.get(url)
 
-                WebDriverWait(driver, 10).until(lambda d: d.find_element(By.ID, "tblDetail"))
+                WebDriverWait(driver, 2).until(lambda d: d.find_element(By.ID, "tblDetail"))
                 table_html = driver.execute_script("return document.getElementById('tblDetail').innerHTML")
 
                 soup = BeautifulSoup(table_html, "html.parser")

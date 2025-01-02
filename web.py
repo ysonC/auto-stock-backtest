@@ -1,10 +1,11 @@
 from flask import Flask, request, jsonify, render_template
-from app import check_and_download_stocks, clean_downloaded_stocks, check_chromedriver
+from app import check_and_download_stocks, clean_downloaded_stocks, check_chromedriver, setup_logging
 
 app = Flask(__name__)
 
 @app.route('/')
 def index():
+    setup_logging(debug_mode=True)
     check_chromedriver()
     return render_template('index.html')
 

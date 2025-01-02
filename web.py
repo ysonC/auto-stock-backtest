@@ -5,6 +5,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def index():
+    check_chromedriver()
     return render_template('index.html')
 
 @app.route('/fetch_stock', methods=['POST'])

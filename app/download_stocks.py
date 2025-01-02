@@ -12,7 +12,7 @@ from halo import Halo
 from datetime import datetime
 import logging
 from .helpers import *
-from .config import DOWNLOAD_DIR, CHROMEDRIVER_PATH, WEB_CHROMEDRIVER_PATH
+from .config import DOWNLOAD_DIR, CHROMEDRIVER_PATH, WEB_CHROMEDRIVER_PATH, GOOGLE_CHROME_BIN
 
 def read_stock_numbers_from_file(file_path):
     """Reads stock numbers from a text file."""
@@ -92,6 +92,7 @@ def download_stock_data(stock_numbers):
     if CHROMEDRIVER_PATH.exists():
         chrome_driver_path = CHROMEDRIVER_PATH
     else:
+        chrome_options.binary_location = GOOGLE_CHROME_BIN
         chrome_driver_path = WEB_CHROMEDRIVER_PATH
     
     service = Service(chrome_driver_path)

@@ -14,6 +14,7 @@ from app import (
     INPUT_STOCK_DIR
 )
 
+
 def get_stock_numbers():
     """Get stock numbers either manually or by reading all files in the 'input_stock' directory."""
     logging.info("Retrieving stock numbers.")
@@ -35,7 +36,8 @@ def get_stock_numbers():
                 try:
                     with open(file, "r") as f:
                         stock_numbers = read_stock_numbers_from_file(file)
-                        logging.info(f"Loaded stock numbers from {file.name}: {stock_numbers}")
+                        logging.info(
+                            f"Loaded stock numbers from {file.name}: {stock_numbers}")
                 except Exception as e:
                     logging.error(f"Error reading file {file.name}: {e}")
         if not stock_numbers:
@@ -67,9 +69,11 @@ def get_stock_numbers():
 def main():
     debug_mode = len(sys.argv) > 1 and sys.argv[1] == "debug"
     setup_logging(debug_mode=debug_mode)
+    check_all_folders()
     log_separator()
     if debug_mode:
-        logging.info("Debug mode enabled. All logs will be displayed in the terminal.")
+        logging.info(
+            "Debug mode enabled. All logs will be displayed in the terminal.")
 
     logging.info("Starting the application.")
 
@@ -80,7 +84,8 @@ def main():
         print(stock_numbers)
 
     # Step 2: Check if chromedriver is available
-    spinner = Halo(text='Checking ChromeDriver...', spinner='line', color='cyan')
+    spinner = Halo(text='Checking ChromeDriver...',
+                   spinner='line', color='cyan')
     spinner.start()
     check_chromedriver()
     spinner.succeed("ChromeDriver is available.")
@@ -91,7 +96,8 @@ def main():
     logging.info("Stock data download completed.")
 
     # Step 4: Clean stock data
-    spinner = Halo(text='Cleaning and processing data...', spinner='line', color='cyan')
+    spinner = Halo(text='Cleaning and processing data...',
+                   spinner='line', color='cyan')
     spinner.start()
     try:
         processed_df = clean_downloaded_stocks(stock_numbers)
@@ -104,7 +110,8 @@ def main():
         sys.exit(1)
 
     # Step 5: Perform MR backtesting
-    spinner = Halo(text='Performing MR backtesting...', spinner='line', color='cyan')
+    spinner = Halo(text='Performing MR backtesting...',
+                   spinner='line', color='cyan')
     spinner.start()
     try:
         result_df = process_stocks(stock_numbers)
@@ -121,10 +128,9 @@ def main():
 
 
 if __name__ == "__main__":
-    check_all_folders()
-
     logging.info("Program execution started.")
     try:
         main()
     except Exception as e:
-        logging.critical(f"Unhandled exception in the program: {e}", exc_info=True)
+        logging.critical(
+            f"Unhandled exception in the program: {e}", exc_info=True)

@@ -12,7 +12,6 @@ setup(
         "pandas",
         "selenium",
         "beautifulsoup4",
-        "tqdm",
         "halo",
         "flask",
         "gunicorn",

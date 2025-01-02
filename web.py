@@ -15,7 +15,6 @@ def fetch_stock():
         return jsonify({'error': 'Stock number is required'}), 400
     
     try:
-
         # Use the provided functions to check and download the stock
         check_and_download_stocks([stock_number])
         clean_result = clean_downloaded_stocks([stock_number])

@@ -14,7 +14,6 @@ def index():
 @app.route('/fetch_stock', methods=['POST'])
 def fetch_stock():
     stock_number = request.form.get('stock_number')
-    
     if not stock_number:
         return jsonify({'error': 'Stock number is required'}), 400
     

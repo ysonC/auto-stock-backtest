@@ -94,6 +94,9 @@ def download_stock_data(stock_numbers):
     else:
         chrome_options.binary_location = GOOGLE_CHROME_BIN
         chrome_driver_path = WEB_CHROMEDRIVER_PATH
+        print(f"GOOGLE_CHROME_BIN: {GOOGLE_CHROME_BIN}")
+        print(f"WEB_CHROMEDRIVER_PATH: {WEB_CHROMEDRIVER_PATH}")
+
     
     service = Service(chrome_driver_path)
     driver = webdriver.Chrome(service=service, options=chrome_options)

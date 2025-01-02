@@ -3,10 +3,11 @@ from app import check_and_download_stocks, clean_downloaded_stocks, check_chrome
 
 app = Flask(__name__)
 
+setup_logging(debug_mode=True)
+check_chromedriver()
+
 @app.route('/')
 def index():
-    setup_logging(debug_mode=True)
-    check_chromedriver()
     return render_template('index.html')
 
 @app.route('/fetch_stock', methods=['POST'])

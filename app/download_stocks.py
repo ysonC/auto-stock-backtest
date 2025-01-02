@@ -5,14 +5,13 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import WebDriverException
 from bs4 import BeautifulSoup
 from pathlib import Path
 from halo import Halo
 from datetime import datetime
 import logging
 from .helpers import *
-from .config import DOWNLOAD_DIR, CHROMEDRIVER_PATH, WEB_CHROMEDRIVER_PATH, GOOGLE_CHROME_BIN
+from .config import DOWNLOAD_DIR, CHROMEDRIVER_PATH
 
 def read_stock_numbers_from_file(file_path):
     """Reads stock numbers from a text file."""
@@ -87,16 +86,6 @@ def download_stock_data(stock_numbers):
         "safebrowsing.enabled": True,
     }
     chrome_options.add_experimental_option("prefs", prefs)
-    
-    # # For Web application
-    # if CHROMEDRIVER_PATH.exists():
-    #     chrome_driver_path = CHROMEDRIVER_PATH
-    # else:
-    #     chrome_options.binary_location = GOOGLE_CHROME_BIN
-    #     chrome_driver_path = WEB_CHROMEDRIVER_PATH
-    #     print(f"GOOGLE_CHROME_BIN: {GOOGLE_CHROME_BIN}")
-    #     print(f"WEB_CHROMEDRIVER_PATH: {WEB_CHROMEDRIVER_PATH}")
-
     
     service = Service(CHROMEDRIVER_PATH)
     driver = webdriver.Chrome(service=service, options=chrome_options)

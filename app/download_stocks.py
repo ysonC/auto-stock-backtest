@@ -1,6 +1,8 @@
 import pandas as pd
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.service import Service as ChromeService
+from selenium.webdriver.firefox.service import Service as FirefoxService
+from webdriver_manager.firefox import GeckoDriverManager
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
@@ -98,7 +100,9 @@ def download_stock_data(stock_numbers):
     chrome_options.add_experimental_option("prefs", prefs)
 
     service = ChromeService(ChromeDriverManager().install())
-    driver = webdriver.Chrome(service=service, options=chrome_options)
+    # driver = webdriver.Chrome(service=service, options=chrome_options)
+    # driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()))
+    driver = webdriver.Firefox(service=FirefoxService(GeckoDriverManager().install()))
 
     header = ['Date', 'Price', 'Change', '% Change', 'EPS',
               'PER', '8X', '9.8X', '11.6X', '13.4X', '15.2X', '17X']

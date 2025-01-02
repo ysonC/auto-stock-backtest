@@ -93,7 +93,7 @@ def download_stock_data(stock_numbers):
         chrome_driver_path = CHROMEDRIVER_PATH
     else:
         chrome_driver_path = WEB_CHROMEDRIVER_PATH
-        
+    
     service = Service(chrome_driver_path)
     driver = webdriver.Chrome(service=service, options=chrome_options)
 

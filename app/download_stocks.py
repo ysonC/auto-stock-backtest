@@ -88,17 +88,17 @@ def download_stock_data(stock_numbers):
     }
     chrome_options.add_experimental_option("prefs", prefs)
     
-    # For Web application
-    if CHROMEDRIVER_PATH.exists():
-        chrome_driver_path = CHROMEDRIVER_PATH
-    else:
-        chrome_options.binary_location = GOOGLE_CHROME_BIN
-        chrome_driver_path = WEB_CHROMEDRIVER_PATH
-        print(f"GOOGLE_CHROME_BIN: {GOOGLE_CHROME_BIN}")
-        print(f"WEB_CHROMEDRIVER_PATH: {WEB_CHROMEDRIVER_PATH}")
+    # # For Web application
+    # if CHROMEDRIVER_PATH.exists():
+    #     chrome_driver_path = CHROMEDRIVER_PATH
+    # else:
+    #     chrome_options.binary_location = GOOGLE_CHROME_BIN
+    #     chrome_driver_path = WEB_CHROMEDRIVER_PATH
+    #     print(f"GOOGLE_CHROME_BIN: {GOOGLE_CHROME_BIN}")
+    #     print(f"WEB_CHROMEDRIVER_PATH: {WEB_CHROMEDRIVER_PATH}")
 
     
-    service = Service(chrome_driver_path)
+    service = Service(CHROMEDRIVER_PATH)
     driver = webdriver.Chrome(service=service, options=chrome_options)
 
     header = ['Date', 'Price', 'Change', '% Change', 'EPS', 'PER', '8X', '9.8X', '11.6X', '13.4X', '15.2X', '17X']

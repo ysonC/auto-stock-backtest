@@ -1,6 +1,7 @@
 import logging
 from logging.handlers import RotatingFileHandler
 from .config import LOGS_DIR
+from .helpers import create_folder
 
 def setup_logging(log_file=LOGS_DIR / "app.log", file_level=logging.DEBUG, debug_mode=False):
     """
@@ -11,6 +12,8 @@ def setup_logging(log_file=LOGS_DIR / "app.log", file_level=logging.DEBUG, debug
     - file_level (int): Logging level for the file handler.
     - debug_mode (bool): If True, enable debug-level logs in the terminal.
     """
+    create_folder(LOGS_DIR)
+    
     # Define the log format
     log_format = "%(asctime)s [%(levelname)s] %(message)s"
     # Suppress Selenium logs

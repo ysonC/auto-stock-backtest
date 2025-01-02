@@ -1,8 +1,9 @@
 from flask import Flask, request, jsonify, render_template
-from app import check_and_download_stocks, clean_downloaded_stocks, check_chromedriver, setup_logging
+from app import check_and_download_stocks, clean_downloaded_stocks, check_chromedriver, setup_logging, check_all_folders
 
 app = Flask(__name__)
 
+check_all_folders()
 setup_logging(debug_mode=True)
 check_chromedriver()
 

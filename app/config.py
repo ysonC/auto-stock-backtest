@@ -12,7 +12,8 @@ STOCK_DATA_DIR = DATA_DIR / "stock_data"
 RESULTS_DIR = DATA_DIR / "results"
 DOWNLOAD_DIR = DATA_DIR / "raw"
 RESOURCES_DIR = BASE_DIR.parent / "resources"
-INPUT_STOCK_DIR = BASE_DIR.parent / "input_stock"
+INPUT_STOCK_DIR = APP_DIR / "input_stock"
+LOGS_DIR = BASE_DIR.parent / "logs"
 
 # Paths to specific files
 PROCESS_DATA_PATH = RESULTS_DIR / "process_data.csv"
@@ -34,7 +35,8 @@ if __name__ == "__main__":
     print(f"DOWNLOAD_DIR: {DOWNLOAD_DIR}")
     print(f"RESOURCES_DIR: {RESOURCES_DIR}")
     print(f"INPUT_STOCK_DIR: {INPUT_STOCK_DIR}")
-    
+    print(f"LOGS_DIR: {LOGS_DIR}")
+
     print(f"PROCESS_DATA_PATH: {PROCESS_DATA_PATH}")
     print(f"OUTPUT_DATA_PATH: {OUTPUT_DATA_PATH}")
     print(f"STOCK_NUMBERS_PATH: {STOCK_NUMBERS_PATH}")

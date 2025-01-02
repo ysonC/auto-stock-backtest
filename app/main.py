@@ -8,32 +8,15 @@ from app import (
     check_and_download_stocks,
     clean_downloaded_stocks,
     process_stocks,
-    create_folder,
+    check_all_folders,
     setup_logging,
     log_separator,
-    CHROMEDRIVER_PATH,
-    DATA_DIR,
-    INPUT_STOCK_DIR,
-    RESULTS_DIR,
-    STOCK_DATA_DIR,
-    DOWNLOAD_DIR,
-    RESOURCES_DIR
+    INPUT_STOCK_DIR
 )
-
-def check_all_folders():
-    """Check if all necessary folders exist."""
-    logging.info("Verifying required folders.")
-    folders = [DATA_DIR, INPUT_STOCK_DIR, RESULTS_DIR,
-               STOCK_DATA_DIR, DOWNLOAD_DIR, RESOURCES_DIR]
-    for folder in folders:
-        create_folder(folder)
-
 
 def get_stock_numbers():
     """Get stock numbers either manually or by reading all files in the 'input_stock' directory."""
     logging.info("Retrieving stock numbers.")
-    input_dir = Path("input_stock")
-    input_dir.mkdir(parents=True, exist_ok=True)
 
     print("Choose input method for stock numbers:")
     print("1. Load all stock IDs and date from files in 'input_stock' directory")
@@ -47,7 +30,7 @@ def get_stock_numbers():
 
     if choice == "1":
         stock_numbers = []
-        for file in input_dir.iterdir():
+        for file in INPUT_STOCK_DIR.iterdir():
             if file.is_file():
                 try:
                     with open(file, "r") as f:
@@ -60,7 +43,7 @@ def get_stock_numbers():
             logging.error("No stock IDs found in 'input_stock' directory.")
             sys.exit(1)
     elif choice == "2":
-        template_file = input_dir / "stock_numbers.txt"
+        template_file = INPUT_STOCK_DIR / "stock_numbers.txt"
         with open(template_file, "w") as file:
             file.write("2303\n")
             file.write("2330\n")
@@ -89,9 +72,6 @@ def main():
         logging.info("Debug mode enabled. All logs will be displayed in the terminal.")
 
     logging.info("Starting the application.")
-    
-    # Step 0: Check if all necessary folders exist
-    check_all_folders()
 
     # Step 1: Get stock numbers
     stock_numbers = get_stock_numbers()
@@ -141,8 +121,8 @@ def main():
 
 
 if __name__ == "__main__":
+    check_all_folders()
 
-    
     logging.info("Program execution started.")
     try:
         main()

@@ -1,6 +1,8 @@
 import pandas as pd
 from pathlib import Path
 from halo import Halo
+import logging
+from .config import DATA_DIR, STOCK_DATA_DIR, RESOURCES_DIR, RESULTS_DIR, DOWNLOAD_DIR, INPUT_STOCK_DIR, LOGS_DIR
 
 def read_excel(file_path, sheet_name=None):
     """Reads an Excel file into a pandas DataFrame."""
@@ -74,3 +76,12 @@ def run_process(task, task_description, success_message, failure_message):
     except Exception as e:
         spinner.fail(failure_message)
         raise e
+    
+def check_all_folders():
+    """Check if all necessary folders exist."""
+    logging.info("Verifying required folders.")
+    folders = [DATA_DIR, INPUT_STOCK_DIR, RESULTS_DIR,
+               STOCK_DATA_DIR, DOWNLOAD_DIR, RESOURCES_DIR,
+               LOGS_DIR]
+    for folder in folders:
+        create_folder(folder)

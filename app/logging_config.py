@@ -1,7 +1,8 @@
 import logging
 from logging.handlers import RotatingFileHandler
+from .config import LOGS_DIR
 
-def setup_logging(log_file="app.log", file_level=logging.DEBUG, debug_mode=False):
+def setup_logging(log_file=LOGS_DIR / "app.log", file_level=logging.DEBUG, debug_mode=False):
     """
     Configure logging to log into a file and optionally display all logs in the terminal.
 

@@ -7,4 +7,4 @@ chromedriver
 auto_stock_backtest.egg-info/
 app/data/results
 app/data/stock_data
-app.log*
+logs/

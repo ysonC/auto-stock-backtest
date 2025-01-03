@@ -5,10 +5,31 @@
 </head>
 <body>
     <h1>I Fetch Stock Data!!!!</h1>
-    <form method="POST" action="/backtest">
-        <label for="stock_number">Enter Stock Number:</label>
-        <input type="text" id="stock_number" name="stock_number" required>
-        <button type="submit">Fetch Data</button>
+
+    <!-- Form for backtest functionality -->
+    
+
+    <hr>
+
+    <!-- Form for fetching stock data -->
+    <form method="GET" action="/stocks">
+        <label for="fetch_stock_symbol">Enter Stock Symbol:</label>
+        <input type="text" id="fetch_stock_symbol" name="stock_symbol" required>
+        <button type="submit">Fetch Stock Info</button>
     </form>
+
+    {% if stock_data %}
+        <h2>Stock Data for {{ stock_symbol }}</h2>
+        <ul>
+            {% for stock in stock_data %}
+                <li>
+                    Date: {{ stock.Date }}, Price: {{ stock.Price or 'N/A' }},
+                    EPS: {{ stock.EPS or 'N/A' }}, PER: {{ stock.PER or 'N/A' }}
+                </li>
+            {% endfor %}
+        </ul>
+    {% elif error %}
+        <p style="color:red;">{{ error }}</p>
+    {% endif %}
 </body>
 </html>

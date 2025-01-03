@@ -1,19 +1,12 @@
 from flask import Flask, request, jsonify, render_template
-from app import check_and_download_stocks, clean_downloaded_stocks, check_chromedriver, setup_logging, check_all_folders
-from flask import Flask, request, jsonify, render_template
-from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
 import os
-from app.backtest import process_stocks  # Import backtesting function
+# Import CRUDHelper for database operations
+from app.db.db_CRUD import CRUDHelper
 from app.db.db_models import Stock_Prices_Weekly  # ORM model
-from sqlalchemy.orm import scoped_session, sessionmaker
-from app.api_functions import backtest_stock
+from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
-
-check_all_folders()
-setup_logging(debug_mode=True)
-check_chromedriver()
 
 # Load environment variables
 load_dotenv()
@@ -29,15 +22,43 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # Initialize database
 db = SQLAlchemy(app)
 
+# Initialize CRUDHelper with the database URL
+crud_helper = CRUDHelper(DATABASE_URL)
+
 
 @app.route('/')
 def index():
     return render_template('index.html')
 
+# @app.route('/backtest', methods=['POST'])
+# def get_backtest_stock():
+#     return backtest_stock(db, request.form['stock_number'])
 
-@app.route('/backtest', methods=['POST'])
-def get_backtest_stock():
-    return backtest_stock(db, request.form['stock_number'])
+
+@app.route('/stocks', methods=['GET'])
+def get_all_stock_info():
+    stock_symbol = request.args.get('stock_symbol')  # Retrieve query parameter
+    if not stock_symbol:
+        return render_template('index.html', error="Stock symbol is required.")
+
+    try:
+        stock_data = crud_helper.get_all_stock_info(stock_symbol)
+        if not stock_data:
+            return render_template(
+                'index.html',
+                error=f"No data found for stock symbol: {stock_symbol}",
+            )
+
+        return render_template(
+            'index.html',
+            stock_data=stock_data,
+            stock_symbol=stock_symbol,
+        )
+    except Exception as e:
+        return render_template(
+            'index.html',
+            error=f"An error occurred: {str(e)}",
+        )
 
 
 if __name__ == "__main__":

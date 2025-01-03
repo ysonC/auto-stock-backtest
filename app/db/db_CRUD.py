@@ -2,7 +2,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine, desc
 from app.db.db_models import Stock_Prices_Weekly
 from app.helpers import parse_custom_date
-from download_stocks import download_stock_data
+from app.download_stocks import download_stock_data
 import pandas as pd
 import logging
 import warnings
@@ -50,6 +50,20 @@ class CRUDHelper:
             )
         except Exception as e:
             logging.error(f"Error fetching latest stock info: {e}")
+            return None
+
+    def get_all_stock_info(self, stock_symbol):
+        """Fetch all stock information for a given stock symbol."""
+        logging.info(f"Fetching all stock info for {stock_symbol}")
+        try:
+            return (
+                self.session.query(Stock_Prices_Weekly)
+                .filter_by(stock_symbol=stock_symbol)
+                .order_by(Stock_Prices_Weekly.Date)
+                .all()
+            )
+        except Exception as e:
+            logging.error(f"Error fetching all stock info: {e}")
             return None
 
     def update_stock_data(self, stock_symbol):

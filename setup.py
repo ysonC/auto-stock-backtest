@@ -17,7 +17,8 @@ setup(
         "gunicorn",
         "webdriver-manager",
         "sqlalchemy",
-        "Flask-SQLAlchemy"
+        "Flask-SQLAlchemy",
+        "psycopg2"
     ],
     entry_points={
         "console_scripts": [

@@ -1,6 +1,7 @@
 import pandas as pd
 from pathlib import Path
 from halo import Halo
+from datetime import datetime, timedelta
 import logging
 from .config import DATA_DIR, STOCK_DATA_DIR, RESOURCES_DIR, RESULTS_DIR, DOWNLOAD_DIR, INPUT_STOCK_DIR, LOGS_DIR
 
@@ -85,3 +86,22 @@ def check_all_folders():
                LOGS_DIR]
     for folder in folders:
         create_folder(folder)
+
+def parse_custom_date(custom_date):
+    """
+    Converts custom date format (e.g., 24W52) to the Friday of that week in standard YYYY-MM-DD format.
+    """
+    try:
+        year = int("20" + custom_date[:2])  # Assumes year is 20XX
+        week = int(custom_date[3:])  # Extract the week number
+
+        # Get the Monday of the given ISO week
+        monday_date = datetime.strptime(f"{year}-W{week}-1", "%G-W%V-%u")
+
+        # Add 4 days to get Friday
+        friday_date = monday_date + timedelta(days=4)
+
+        return friday_date
+    except Exception as e:
+        logging.warning(f"Error parsing date '{custom_date}': {e}")
+        return None

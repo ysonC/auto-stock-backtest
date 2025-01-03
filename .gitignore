@@ -8,3 +8,4 @@ auto_stock_backtest.egg-info/
 app/data/results
 app/data/stock_data
 logs/
+.env

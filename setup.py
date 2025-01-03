@@ -15,7 +15,8 @@ setup(
         "halo",
         "flask",
         "gunicorn",
-        "webdriver-manager"
+        "webdriver-manager",
+        "sqlalchemy"
     ],
     entry_points={
         "console_scripts": [

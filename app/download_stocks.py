@@ -11,7 +11,6 @@ from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
 from pathlib import Path
 from halo import Halo
-from datetime import datetime
 import logging
 from .helpers import *
 from .config import DOWNLOAD_DIR, CHROMEDRIVER_PATH
@@ -29,17 +28,6 @@ def read_stock_numbers_from_file(file_path):
         logging.error(
             f"Error reading stock numbers from file {file_path}: {e}")
         raise
-
-
-def parse_custom_date(custom_date):
-    """Converts custom date format (24W52) to a standard YYYY-MM-DD format."""
-    try:
-        year = int("20" + custom_date[:2])  # Assumes year is 20XX
-        week = int(custom_date[3:])  # Extract the week number
-        return datetime.strptime(f"{year}-W{week}-1", "%Y-W%U-%w")
-    except Exception as e:
-        logging.warning(f"Error parsing date '{custom_date}': {e}")
-        return None
 
 
 def is_stock_data_up_to_date(stock_number):
@@ -100,9 +88,7 @@ def download_stock_data(stock_numbers):
     chrome_options.add_experimental_option("prefs", prefs)
 
     service = ChromeService(ChromeDriverManager().install())
-    # driver = webdriver.Chrome(service=service, options=chrome_options)
-    # driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()))
-    driver = webdriver.Firefox(service=FirefoxService(GeckoDriverManager().install()))
+    driver = webdriver.Chrome(service=service, options=chrome_options)
 
     header = ['Date', 'Price', 'Change', '% Change', 'EPS',
               'PER', '8X', '9.8X', '11.6X', '13.4X', '15.2X', '17X']

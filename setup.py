@@ -16,7 +16,8 @@ setup(
         "flask",
         "gunicorn",
         "webdriver-manager",
-        "sqlalchemy"
+        "sqlalchemy",
+        "Flask-SQLAlchemy"
     ],
     entry_points={
         "console_scripts": [

@@ -7,6 +7,7 @@ from sqlalchemy.orm import sessionmaker
 import logging
 import warnings
 from app.helpers import parse_custom_date
+from db_models import Stock_Prices_Weekly
 
 # Suppress warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -18,19 +19,6 @@ logging.getLogger("sqlalchemy.engine").setLevel(logging.WARNING)
 
 # Define the base class for ORM models
 Base = declarative_base()
-
-# Define the Stock model
-class Stock(Base):
-    __tablename__ = 'stock_data'
-    id = Column(Integer, primary_key=True)
-    stock_symbol = Column(String(10), nullable=False)
-    Date = Column(Date, nullable=False)
-    Price = Column(Numeric(12, 2))
-    EPS = Column(Numeric(12, 2))
-    PER = Column(Numeric(12, 2))
-
-    def __repr__(self):
-        return f"<Stock(symbol={self.stock_symbol}, Date={self.date}, Price={self.price}, EPS={self.EPS}, PER={self.PER})>"
 
 # Main script
 if __name__ == "__main__":
@@ -45,7 +33,8 @@ if __name__ == "__main__":
         DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
     # Create database engine
-    engine = create_engine(DATABASE_URL, echo=False)  # Disable echo for reduced verbosity
+    # Disable echo for reduced verbosity
+    engine = create_engine(DATABASE_URL, echo=False)
 
     # Create tables if they don't exist
     Base.metadata.create_all(engine)
@@ -69,7 +58,7 @@ if __name__ == "__main__":
 
             # Insert data row by row into the session
             for _, row in df.iterrows():
-                stock = Stock(
+                stock = Stock_Prices_Weekly(
                     stock_symbol=stock_symbol,
                     Date=row['Date'],
                     Price=row['Price'],
@@ -84,11 +73,11 @@ if __name__ == "__main__":
             session.rollback()
 
     # Insert data from CSV files
-    insert_data_from_csv('app/data/raw/1104.csv', '1104')
+    insert_data_from_csv('app/data/raw/1101.csv', '1101')
 
     # Fetch and print a summary of inserted rows
     try:
-        count = session.query(Stock).count()
+        count = session.query(Stock_Prices_Weekly).count()
         print(f"Total rows in stock_data: {count}")
     except Exception as e:
         print(f"Error fetching data: {e}")

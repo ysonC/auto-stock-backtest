@@ -5,10 +5,12 @@ from sqlalchemy.ext.declarative import declarative_base
 Base = declarative_base()
 
 # Define the Stock model
-class Stock(Base):
-    __tablename__ = 'stock_data'
+
+
+class Stock_Prices_Weekly(Base):
+    __tablename__ = 'stock_prices_weekly'
     id = Column(Integer, primary_key=True)
-    stock_symbol = Column(String(10), nullable=False)
+    stock_symbol = Column(Numeric(12, 2), nullable=False)
     Date = Column(Date, nullable=False)
     Price = Column(Numeric(12, 2))
     EPS = Column(Numeric(12, 2))

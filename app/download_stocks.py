@@ -12,8 +12,8 @@ from bs4 import BeautifulSoup
 from pathlib import Path
 from halo import Halo
 import logging
-from .helpers import *
-from .config import DOWNLOAD_DIR, CHROMEDRIVER_PATH
+from app.helpers import *
+from app.config import DOWNLOAD_DIR, CHROMEDRIVER_PATH
 
 
 def read_stock_numbers_from_file(file_path):

@@ -9,3 +9,4 @@ app/data/results
 app/data/stock_data
 logs/
 .env
+.idea

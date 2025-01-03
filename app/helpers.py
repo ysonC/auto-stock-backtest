@@ -101,7 +101,7 @@ def parse_custom_date(custom_date):
         # Add 4 days to get Friday
         friday_date = monday_date + timedelta(days=4)
 
-        return friday_date
+        return friday_date.date()
     except Exception as e:
         logging.warning(f"Error parsing date '{custom_date}': {e}")
         return None

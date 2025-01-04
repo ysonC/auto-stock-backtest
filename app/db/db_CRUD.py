@@ -6,7 +6,7 @@ from sqlalchemy import create_engine, desc
 from app.db.db_models import Stock_Prices_Weekly
 from app.helpers import parse_custom_date
 from app.download_stocks import download_stock_data
-from datetime import datetime
+from datetime import datetime, timedelta
 from app.config import DOWNLOAD_DIR
 from app.helpers import read_csv
 
@@ -60,7 +60,7 @@ class CRUDHelper:
             return (
                 self.session.query(Stock_Prices_Weekly)
                 .filter_by(stock_id=stock_id)
-                .order_by(Stock_Prices_Weekly.Date)
+                .order_by(desc(Stock_Prices_Weekly.Date))
                 .all()
             )
         except Exception as e:
@@ -73,7 +73,20 @@ class CRUDHelper:
         try:
             # Fetch the latest stock info
             latest_stock = self.get_latest_stock_info(stock_id)
+            
+            # Check if the data is up-to-date with the most recent weekday
+            today = datetime.now().date()
+            if today.weekday() >= 5:  # 5 = Saturday, 6 = Sunday
+                most_recent_weekday = today - timedelta(days=today.weekday() - 4)
+            else:
+                most_recent_weekday = today
 
+            # Compare the latest stock date with the most recent weekday
+            logging.info(f"Comparing latest_stock.Date: {latest_stock.Date} with most_recent_weekday: {most_recent_weekday}")
+            if latest_stock.Date == most_recent_weekday:
+                logging.info(f"Stock {stock_id} data is up-to-date. No update required.")
+                return True
+            
             # If no data exists, download everything
             if not latest_stock:
                 logging.info(
@@ -104,12 +117,6 @@ class CRUDHelper:
                 self.session.commit()
                 return True
             
-            # Check if the data is up-to-date
-            if latest_stock.Date == datetime.now().date():
-                logging.info(
-                    f"Stock {stock_id} data is up-to-date. No update required.")
-                return True
-            
             # Download the latest data
             download_stock_data([stock_id])
             downloaded_file_path = f"app/data/raw/{stock_id}.csv"
@@ -123,7 +130,6 @@ class CRUDHelper:
 
             # Filter data to include only new entries
             df = df[df['Date'] > latest_stock.Date]
-            print(df)
             if df.empty:
                 logging.info(f"No new data for stock {stock_id}.")
                 return True

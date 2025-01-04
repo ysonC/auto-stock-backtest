@@ -13,5 +13,5 @@ def index():
     return render_template('index.html')
 
 if __name__ == "__main__":
+    setup_logging(debug_mode=True)
     app.run(debug=True)
-    setup_logging()

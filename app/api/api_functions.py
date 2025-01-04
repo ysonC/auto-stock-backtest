@@ -2,7 +2,7 @@ from flask import Blueprint, jsonify, request
 from app.db.db_CRUD import CRUDHelper
 import os
 
-# Configure database
+# Get database URL from environment variable
 DATABASE_URL = os.getenv("DATABASE_URL")
 if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
@@ -13,25 +13,11 @@ api = Blueprint('api', __name__)
 # Initialize CRUDHelper
 crud_helper = CRUDHelper(database_url=DATABASE_URL)
 
-@api.route('/stocks/<int:stock_id>', methods=['GET'])
-def get_stock(stock_id):
-    """Fetch the latest stock information."""
-    stock = crud_helper.get_latest_stock_info(stock_id)
-    if not stock:
-        return jsonify({"error": "Stock not found"}), 404
-    return jsonify({
-        "stock_id": stock.stock_id,
-        "Date": stock.Date.isoformat(),
-        "Price": stock.Price,
-        "EPS": stock.EPS,
-        "PER": stock.PER
-    })
-
-@api.route('/stocks', methods=['GET'])
-def get_stocks():
+@api.route('/stock', methods=['GET'])
+def get_stock_data():
     """Fetch all stock data with pagination."""
     stock_id = request.args.get("stock_id", type=int)
-    limit = request.args.get("limit", 10, type=int)
+    limit = request.args.get("limit", 100, type=int)
     offset = request.args.get("offset", 0, type=int)
 
     if not stock_id:
@@ -52,5 +38,28 @@ def get_stocks():
         }
         for stock in stocks[offset:offset + limit]
     ]
-    return jsonify(result)
+    return jsonify(result), 200
 
+@api.route('/stock/update', methods=['POST'])
+def update_stock_data():
+    """Update stock data for a given stock symbol."""
+    stock_id = request.args.get("stock_id", type=int)
+
+    if not stock_id:
+        return jsonify({"error": "Stock ID is required"}), 400
+
+    crud_helper.update_stock_data(stock_id)
+    
+    stocks = crud_helper.get_all_stock_info(stock_id)
+    # Serialize the results
+    result = [
+        {
+            "stock_id": stock.stock_id,
+            "Date": stock.Date.isoformat(),
+            "Price": stock.Price,
+            "EPS": stock.EPS,
+            "PER": stock.PER
+        }
+        for stock in stocks
+    ]
+    return jsonify(result), 200

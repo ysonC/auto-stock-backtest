@@ -1,4 +1,5 @@
 import pandas as pd
+import logging
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.firefox.service import Service as FirefoxService
@@ -11,7 +12,6 @@ from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
 from pathlib import Path
 from halo import Halo
-import logging
 from app.helpers import *
 from app.config import DOWNLOAD_DIR, CHROMEDRIVER_PATH
 
@@ -133,6 +133,7 @@ def download_stock_data(stock_numbers):
             logging.warning(f"Stocks with errors: {error_stocks}")
         driver.quit()
         logging.info("Download process completed.")
+    return error_stocks
 
 
 def check_and_download_stocks(stock_numbers):

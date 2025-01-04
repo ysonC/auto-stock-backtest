@@ -1,13 +1,14 @@
+import pandas as pd
+import logging
+import warnings
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine, desc
 from app.db.db_models import Stock_Prices_Weekly
 from app.helpers import parse_custom_date
 from app.download_stocks import download_stock_data
-import pandas as pd
-import logging
-import warnings
 from datetime import datetime
 from app.config import DOWNLOAD_DIR
+from app.helpers import read_csv
 
 # Suppress warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -76,9 +77,14 @@ class CRUDHelper:
             if not latest_stock:
                 logging.info(
                     f"No data for stock {stock_symbol}, downloading all data.")
-                download_stock_data([stock_symbol])
+                error_stocks = download_stock_data([stock_symbol])
+                if stock_symbol in error_stocks:
+                    logging.error(
+                        f"Stock {stock_symbol} not found. Download failed.")
+                    return False
+                
                 # Read and parse the downloaded data
-                df = pd.read_csv(DOWNLOAD_DIR / f"{stock_symbol}.csv")
+                df = read_csv(DOWNLOAD_DIR / f"{stock_symbol}.csv")
                 df['Date'] = df['Date'].apply(parse_custom_date)
                 df['Price'] = pd.to_numeric(df['Price'], errors='coerce')
                 df['EPS'] = pd.to_numeric(df['EPS'], errors='coerce')
@@ -95,13 +101,13 @@ class CRUDHelper:
                     )
                     self.session.add(stock)
                 self.session.commit()
-                return "Stock not found. Downloaded and update to database."
+                return True
             
             # Check if the data is up-to-date
             if latest_stock.Date == datetime.now().date():
                 logging.info(
                     f"Stock {stock_symbol} data is up-to-date. No update required.")
-                return "No updates required."
+                return True
             
             # Download the latest data
             download_stock_data([stock_symbol])
@@ -119,7 +125,7 @@ class CRUDHelper:
             print(df)
             if df.empty:
                 logging.info(f"No new data for stock {stock_symbol}.")
-                return "No updates required."
+                return True
 
             # Insert new rows into the database
             for _, row in df.iterrows():
@@ -133,11 +139,11 @@ class CRUDHelper:
                 self.session.add(stock)
             self.session.commit()
             logging.info(f"Stock {stock_symbol} updated successfully.")
-            return "Update completed."
+            return True
         except Exception as e:
             logging.error(f"Error updating stock {stock_symbol}: {e}")
             self.session.rollback()
-            return "Update failed."
+            return False
 
     def close(self):
         """Close the session."""

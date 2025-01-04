@@ -2,32 +2,59 @@
 <html>
 <head>
     <title>Stock Data Fetcher</title>
+    <script>
+        // Show loading indicator when a form is submitted
+        function showLoading(event, loadingDivId) {
+            const loadingDiv = document.getElementById(loadingDivId);
+            loadingDiv.style.display = "block"; // Show the loading message
+        }
+    </script>
 </head>
 <body>
     <h1>I Fetch Stock Data!!!!</h1>
 
     <!-- Form for backtest functionality -->
-    
+    <form method="POST" action="/backtest" onsubmit="showLoading(event, 'backtest_loading')">
+        <label for="stock_number">Enter Stock Number:</label>
+        <input type="text" id="stock_number" name="stock_number" required>
+        <button type="submit">Fetch Data</button>
+    </form>
+    <div id="backtest_loading" style="display: none;">Loading... Please wait.</div>
 
     <hr>
 
     <!-- Form for fetching stock data -->
-    <form method="GET" action="/stocks">
+    <form method="GET" action="/stocks" onsubmit="showLoading(event, 'stocks_loading')">
         <label for="fetch_stock_symbol">Enter Stock Symbol:</label>
         <input type="text" id="fetch_stock_symbol" name="stock_symbol" required>
         <button type="submit">Fetch Stock Info</button>
     </form>
+    <div id="stocks_loading" style="display: none;">Loading... Fetching stock data.</div>
 
+    <!-- Result placeholders -->
     {% if stock_data %}
         <h2>Stock Data for {{ stock_symbol }}</h2>
-        <ul>
-            {% for stock in stock_data %}
-                <li>
-                    Date: {{ stock.Date }}, Price: {{ stock.Price or 'N/A' }},
-                    EPS: {{ stock.EPS or 'N/A' }}, PER: {{ stock.PER or 'N/A' }}
-                </li>
-            {% endfor %}
-        </ul>
+        <table border="1" cellspacing="0" cellpadding="5">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Date</th>
+                    <th>Price</th>
+                    <th>EPS</th>
+                    <th>PER</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for stock in stock_data %}
+                <tr>
+                    <td>{{ stock.Date }}</td>
+                    <td>{{ stock.Price or 'N/A' }}</td>
+                    <td>{{ stock.EPS or 'N/A' }}</td>
+                    <td>{{ stock.PER or 'N/A' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     {% elif error %}
         <p style="color:red;">{{ error }}</p>
     {% endif %}

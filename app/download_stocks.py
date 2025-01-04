@@ -16,7 +16,6 @@ from app.config import DOWNLOAD_DIR, WEB_CHROMEDRIVER_PATH
 def get_service():
     try:
         # Use Heroku ChromeDriver if available
-        print(WEB_CHROMEDRIVER_PATH)
         if WEB_CHROMEDRIVER_PATH.exists():
             logging.info("Using Heroku's ChromeDriver.")
             return ChromeService(executable_path=str(WEB_CHROMEDRIVER_PATH))
@@ -131,6 +130,8 @@ def download_stock_data(stock_numbers):
                 output_file_path = Path(DOWNLOAD_DIR) / f"{stock_number}.csv"
                 df = pd.DataFrame(data, columns=header)
                 df = df.dropna(how='all')
+                # Remove rows with 53rd week
+                df = df[~df['Date'].str.endswith('W53')]
                 save_to_csv(df, output_file_path, False)
                 logging.info(
                     f"Downloaded and saved data for stock {stock_number} to {output_file_path}.")

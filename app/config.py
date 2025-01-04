@@ -22,7 +22,7 @@ STOCK_NUMBERS_PATH = INPUT_STOCK_DIR / "stock_numbers.txt"
 
 # ChromeDriver path
 CHROMEDRIVER_PATH = RESOURCES_DIR / "chromedriver"
-WEB_CHROMEDRIVER_PATH = ".chrome-for-testing/chromedriver-linux64/chromedriver"
+WEB_CHROMEDRIVER_PATH = Path("/.chromedriver/bin/chromedriver")
 GOOGLE_CHROME_BIN = APP_DIR / ".chrome-for-testing/chrome-linux/chrome"
 
 # Debug: Print paths to verify correctness during setup

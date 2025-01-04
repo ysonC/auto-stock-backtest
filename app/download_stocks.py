@@ -17,8 +17,7 @@ from app.config import DOWNLOAD_DIR, WEB_CHROMEDRIVER_PATH
 
 def get_service():
     try:
-        # Use Heroku ChromeDriver
-        WEB_CHROMEDRIVER_PATH = Path("/app/.chromedriver/bin/chromedriver")
+        # Use Heroku ChromeDriver if available
         if WEB_CHROMEDRIVER_PATH.exists():
             logging.info("Using Heroku's ChromeDriver.")
             return ChromeService(executable_path=str(WEB_CHROMEDRIVER_PATH))

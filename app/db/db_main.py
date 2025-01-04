@@ -43,7 +43,7 @@ if __name__ == "__main__":
     Session = sessionmaker(bind=engine)
     session = Session()
 
-    def insert_data_from_csv(file_path, stock_symbol):
+    def insert_data_from_csv(file_path, stock_id):
         """Insert stock data from a CSV file."""
         try:
             # Read and clean data
@@ -59,7 +59,7 @@ if __name__ == "__main__":
             # Insert data row by row into the session
             for _, row in df.iterrows():
                 stock = Stock_Prices_Weekly(
-                    stock_symbol=stock_symbol,
+                    stock_id=stock_id,
                     Date=row['Date'],
                     Price=row['Price'],
                     EPS=row['EPS'],

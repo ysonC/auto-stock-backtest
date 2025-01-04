@@ -39,13 +39,13 @@ class CRUDHelper:
         Session = sessionmaker(bind=self.engine)
         self.session = Session()
 
-    def get_latest_stock_info(self, stock_symbol):
+    def get_latest_stock_info(self, stock_id):
         """Fetch the latest stock information for a given stock symbol."""
-        logging.info(f"Fetching latest stock info for {stock_symbol}")
+        logging.info(f"Fetching latest stock info for {stock_id}")
         try:
             return (
                 self.session.query(Stock_Prices_Weekly)
-                .filter_by(stock_symbol=stock_symbol)
+                .filter_by(stock_id=stock_id)
                 .order_by(desc(Stock_Prices_Weekly.Date))
                 .first()
             )
@@ -53,13 +53,13 @@ class CRUDHelper:
             logging.error(f"Error fetching latest stock info: {e}")
             return None
 
-    def get_all_stock_info(self, stock_symbol):
+    def get_all_stock_info(self, stock_id):
         """Fetch all stock information for a given stock symbol."""
-        logging.info(f"Fetching all stock info for {stock_symbol}")
+        logging.info(f"Fetching all stock info for {stock_id}")
         try:
             return (
                 self.session.query(Stock_Prices_Weekly)
-                .filter_by(stock_symbol=stock_symbol)
+                .filter_by(stock_id=stock_id)
                 .order_by(Stock_Prices_Weekly.Date)
                 .all()
             )
@@ -67,24 +67,25 @@ class CRUDHelper:
             logging.error(f"Error fetching all stock info: {e}")
             return None
 
-    def update_stock_data(self, stock_symbol):
-        """Check and update stock data for a given stock symbol."""
+    def update_stock_data(self, stock_id):
+        """Check and update 
+        tock data for a given stock symbol."""
         try:
             # Fetch the latest stock info
-            latest_stock = self.get_latest_stock_info(stock_symbol)
+            latest_stock = self.get_latest_stock_info(stock_id)
 
             # If no data exists, download everything
             if not latest_stock:
                 logging.info(
-                    f"No data for stock {stock_symbol}, downloading all data.")
-                error_stocks = download_stock_data([stock_symbol])
-                if stock_symbol in error_stocks:
+                    f"No data for stock {stock_id}, downloading all data.")
+                error_stocks = download_stock_data([stock_id])
+                if stock_id in error_stocks:
                     logging.error(
-                        f"Stock {stock_symbol} not found. Download failed.")
+                        f"Stock {stock_id} not found. Download failed.")
                     return False
                 
                 # Read and parse the downloaded data
-                df = read_csv(DOWNLOAD_DIR / f"{stock_symbol}.csv")
+                df = read_csv(DOWNLOAD_DIR / f"{stock_id}.csv")
                 df['Date'] = df['Date'].apply(parse_custom_date)
                 df['Price'] = pd.to_numeric(df['Price'], errors='coerce')
                 df['EPS'] = pd.to_numeric(df['EPS'], errors='coerce')
@@ -93,7 +94,7 @@ class CRUDHelper:
                 # Insert new rows into the database
                 for _, row in df.iterrows():
                     stock = Stock_Prices_Weekly(
-                        stock_symbol=stock_symbol,
+                        stock_id=stock_id,
                         Date=row['Date'],
                         Price=row['Price'],
                         EPS=row['EPS'],
@@ -106,12 +107,12 @@ class CRUDHelper:
             # Check if the data is up-to-date
             if latest_stock.Date == datetime.now().date():
                 logging.info(
-                    f"Stock {stock_symbol} data is up-to-date. No update required.")
+                    f"Stock {stock_id} data is up-to-date. No update required.")
                 return True
             
             # Download the latest data
-            download_stock_data([stock_symbol])
-            downloaded_file_path = f"app/data/raw/{stock_symbol}.csv"
+            download_stock_data([stock_id])
+            downloaded_file_path = f"app/data/raw/{stock_id}.csv"
 
             # Read and parse the downloaded data
             df = pd.read_csv(downloaded_file_path)
@@ -124,13 +125,13 @@ class CRUDHelper:
             df = df[df['Date'] > latest_stock.Date]
             print(df)
             if df.empty:
-                logging.info(f"No new data for stock {stock_symbol}.")
+                logging.info(f"No new data for stock {stock_id}.")
                 return True
 
             # Insert new rows into the database
             for _, row in df.iterrows():
                 stock = Stock_Prices_Weekly(
-                    stock_symbol=stock_symbol,
+                    stock_id=stock_id,
                     Date=row['Date'],
                     Price=row['Price'],
                     EPS=row['EPS'],
@@ -138,10 +139,10 @@ class CRUDHelper:
                 )
                 self.session.add(stock)
             self.session.commit()
-            logging.info(f"Stock {stock_symbol} updated successfully.")
+            logging.info(f"Stock {stock_id} updated successfully.")
             return True
         except Exception as e:
-            logging.error(f"Error updating stock {stock_symbol}: {e}")
+            logging.error(f"Error updating stock {stock_id}: {e}")
             self.session.rollback()
             return False
 

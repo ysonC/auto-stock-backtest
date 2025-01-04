@@ -25,15 +25,15 @@
 
     <!-- Form for fetching stock data -->
     <form method="GET" action="/stocks" onsubmit="showLoading(event, 'stocks_loading')">
-        <label for="fetch_stock_symbol">Enter Stock Symbol:</label>
-        <input type="text" id="fetch_stock_symbol" name="stock_symbol" required>
+        <label for="fetch_stock_id">Enter Stock Symbol:</label>
+        <input type="text" id="fetch_stock_id" name="stock_id" required>
         <button type="submit">Fetch Stock Info</button>
     </form>
     <div id="stocks_loading" style="display: none;">Loading... Fetching stock data.</div>
 
     <!-- Result placeholders -->
     {% if stock_data %}
-        <h2>Stock Data for {{ stock_symbol }}</h2>
+        <h2>Stock Data for {{ stock_id }}</h2>
         <table border="1" cellspacing="0" cellpadding="5">
             <thead>
                 <tr>

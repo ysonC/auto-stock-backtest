@@ -2,31 +2,32 @@ import pandas as pd
 import logging
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.service import Service as ChromeService
-from selenium.webdriver.firefox.service import Service as FirefoxService
-from webdriver_manager.firefox import GeckoDriverManager
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
 from pathlib import Path
 from halo import Halo
 from app.helpers import *
 from app.config import DOWNLOAD_DIR, WEB_CHROMEDRIVER_PATH
 
+
 def get_service():
     try:
         # Use Heroku ChromeDriver if available
+        print(WEB_CHROMEDRIVER_PATH)
         if WEB_CHROMEDRIVER_PATH.exists():
             logging.info("Using Heroku's ChromeDriver.")
             return ChromeService(executable_path=str(WEB_CHROMEDRIVER_PATH))
         else:
-            logging.warning("Heroku ChromeDriver not found. Falling back to WebDriverManager.")
+            logging.warning(
+                "Heroku ChromeDriver not found. Falling back to WebDriverManager.")
             return ChromeService(ChromeDriverManager().install())
     except Exception as e:
         logging.error(f"Failed to initialize ChromeDriver service: {e}")
         raise
+
 
 def read_stock_numbers_from_file(file_path):
     """Reads stock numbers from a text file."""
@@ -98,7 +99,7 @@ def download_stock_data(stock_numbers):
         "safebrowsing.enabled": True,
     }
     chrome_options.add_experimental_option("prefs", prefs)
-    
+
     service = get_service()
     driver = webdriver.Chrome(service=service, options=chrome_options)
 

@@ -46,7 +46,7 @@ def get_all_stock_info():
     try:
         # Attempt to fetch stock data
         stock_data = crud_helper.get_all_stock_info(stock_id)
-
+        print(stock_data)
         # If no data is found, try downloading it
         if not stock_data:
             download_result = crud_helper.update_stock_data(stock_id)

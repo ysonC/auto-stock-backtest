@@ -145,7 +145,10 @@ class CRUDHelper:
             logging.error(f"Error updating stock {stock_id}: {e}")
             self.session.rollback()
             return False
-
+        
+        finally:
+            self.session.close()
+ 
     def close(self):
         """Close the session."""
         self.session.close()

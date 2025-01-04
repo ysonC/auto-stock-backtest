@@ -24,12 +24,45 @@
     <hr>
 
     <!-- Form for fetching stock data -->
+    <form method="GET" action="/latest_stock" onsubmit="showLoading(event, 'stocks_loading')">
+        <label for="get_latest_stock_id">Enter Stock Id for latest info:</label>
+        <input type="text" id="get_latest_stock_id" name="stock_id" required>
+        <button type="submit">Fetch Stock Info</button>
+    </form>
+    <div id="stocks_loading" style="display: none;">Loading... Fetching stock data.</div>
+
+    <!-- Form for fetching stock data -->
     <form method="GET" action="/stocks" onsubmit="showLoading(event, 'stocks_loading')">
-        <label for="fetch_stock_id">Enter Stock Symbol:</label>
+        <label for="fetch_stock_id">Enter Stock Id for all info:</label>
         <input type="text" id="fetch_stock_id" name="stock_id" required>
         <button type="submit">Fetch Stock Info</button>
     </form>
     <div id="stocks_loading" style="display: none;">Loading... Fetching stock data.</div>
+
+    <!-- Lastest stock info result -->
+    {% if one_stock %}
+        <h2>Stock Data for {{ stock_id }}</h2>
+        <table border="1" cellspacing="0" cellpadding="5">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Price</th>
+                    <th>EPS</th>
+                    <th>PER</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{{ one_stock.Date }}</td>
+                    <td>{{ one_stock.Price or 'N/A' }}</td>
+                    <td>{{ one_stock.EPS or 'N/A' }}</td>
+                    <td>{{ one_stock.PER or 'N/A' }}</td>
+                </tr>
+            </tbody>
+        </table>
+    {% elif error %}
+        <p style="color:red;">{{ error }}</p>
+    {% endif %}
 
     <!-- Result placeholders -->
     {% if stock_data %}

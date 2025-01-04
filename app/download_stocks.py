@@ -13,8 +13,21 @@ from bs4 import BeautifulSoup
 from pathlib import Path
 from halo import Halo
 from app.helpers import *
-from app.config import DOWNLOAD_DIR, CHROMEDRIVER_PATH
+from app.config import DOWNLOAD_DIR, WEB_CHROMEDRIVER_PATH
 
+def get_service():
+    try:
+        # Use Heroku ChromeDriver
+        WEB_CHROMEDRIVER_PATH = Path("/app/.chromedriver/bin/chromedriver")
+        if WEB_CHROMEDRIVER_PATH.exists():
+            logging.info("Using Heroku's ChromeDriver.")
+            return ChromeService(executable_path=str(WEB_CHROMEDRIVER_PATH))
+        else:
+            logging.warning("Heroku ChromeDriver not found. Falling back to WebDriverManager.")
+            return ChromeService(ChromeDriverManager().install())
+    except Exception as e:
+        logging.error(f"Failed to initialize ChromeDriver service: {e}")
+        raise
 
 def read_stock_numbers_from_file(file_path):
     """Reads stock numbers from a text file."""
@@ -86,8 +99,8 @@ def download_stock_data(stock_numbers):
         "safebrowsing.enabled": True,
     }
     chrome_options.add_experimental_option("prefs", prefs)
-
-    service = ChromeService(ChromeDriverManager().install())
+    
+    service = get_service()
     driver = webdriver.Chrome(service=service, options=chrome_options)
 
     header = ['Date', 'Price', 'Change', '% Change', 'EPS',

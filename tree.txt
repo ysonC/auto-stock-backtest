@@ -21,7 +21,8 @@
 │   ├── config.py
 │   ├── data
 │   │   ├── raw
-│   │   │   └── 1101.csv
+│   │   │   ├── 1101.csv
+│   │   │   └── 3023.csv
 │   │   ├── results
 │   │   │   ├── backtest_MR_data.csv
 │   │   │   └── process_data.csv
@@ -29,14 +30,12 @@
 │   │       └── 1101.csv
 │   ├── db
 │   │   ├── db_CRUD.py
-│   │   ├── db_main.py
 │   │   └── db_models.py
-│   ├── download_chromedriver.py
 │   ├── download_stocks.py
 │   ├── helpers.py
 │   ├── input_stock
 │   │   └── stock_numbers.txt
-│   ├── logging_config.py
+│   ├── logging.py
 │   └── main.py
 ├── auto_stock_backtest.egg-info
 │   ├── PKG-INFO
@@ -50,7 +49,6 @@
 ├── play_ground.py
 ├── resources
 │   ├── all_stocks_number.txt
-│   ├── chromedriver
 │   ├── demo.gif
 │   ├── pipinstall.gif
 │   ├── requirements.txt
@@ -66,4 +64,4 @@
     │   └── index.html
     └── web.py
 
-16 directories, 51 files
+16 directories, 49 files

@@ -3,7 +3,6 @@ from pathlib import Path
 from halo import Halo
 import logging
 from app import (
-    check_chromedriver,
     read_stock_numbers_from_file,
     check_and_download_stocks,
     clean_downloaded_stocks,
@@ -87,7 +86,6 @@ def main():
     spinner = Halo(text='Checking ChromeDriver...',
                    spinner='line', color='cyan')
     spinner.start()
-    check_chromedriver()
     spinner.succeed("ChromeDriver is available.")
 
     # Step 3: Download stock data

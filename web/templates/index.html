@@ -24,7 +24,7 @@
     <hr>
 
     <!-- Form for fetching stock data -->
-    <form method="GET" action="/latest_stock" onsubmit="showLoading(event, 'stocks_loading')">
+    <form method="GET" action="/api/latest_stock" onsubmit="showLoading(event, 'stocks_loading')">
         <label for="get_latest_stock_id">Enter Stock Id for latest info:</label>
         <input type="text" id="get_latest_stock_id" name="stock_id" required>
         <button type="submit">Fetch Stock Info</button>
@@ -32,7 +32,7 @@
     <div id="stocks_loading" style="display: none;">Loading... Fetching stock data.</div>
 
     <!-- Form for fetching stock data -->
-    <form method="GET" action="/stocks" onsubmit="showLoading(event, 'stocks_loading')">
+    <form method="GET" action="/api/stocks" onsubmit="showLoading(event, 'stocks_loading')">
         <label for="fetch_stock_id">Enter Stock Id for all info:</label>
         <input type="text" id="fetch_stock_id" name="stock_id" required>
         <button type="submit">Fetch Stock Info</button>

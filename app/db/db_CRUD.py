@@ -45,13 +45,15 @@ class CRUDHelper:
         try:
             return (
                 self.session.query(Stock_Prices_Weekly)
-                .filter_by(stock_id=stock_id)
+                .filter_by(Stock_id=stock_id)
                 .order_by(desc(Stock_Prices_Weekly.Date))
                 .first()
             )
         except Exception as e:
             logging.error(f"Error fetching latest stock info: {e}")
             return None
+        finally:
+            self.session.close()
 
     def get_all_stock_info(self, stock_id):
         """Fetch all stock information for a given stock symbol."""
@@ -59,13 +61,15 @@ class CRUDHelper:
         try:
             return (
                 self.session.query(Stock_Prices_Weekly)
-                .filter_by(stock_id=stock_id)
+                .filter_by(Stock_id=stock_id)
                 .order_by(desc(Stock_Prices_Weekly.Date))
                 .all()
             )
         except Exception as e:
             logging.error(f"Error fetching all stock info: {e}")
             return None
+        finally:
+            self.session.close()
 
     def update_stock_data(self, stock_id):
         """Check and update 
@@ -107,7 +111,7 @@ class CRUDHelper:
                 # Insert new rows into the database
                 for _, row in df.iterrows():
                     stock = Stock_Prices_Weekly(
-                        stock_id=stock_id,
+                        Stock_id=stock_id,
                         Date=row['Date'],
                         Price=row['Price'],
                         EPS=row['EPS'],
@@ -137,7 +141,7 @@ class CRUDHelper:
             # Insert new rows into the database
             for _, row in df.iterrows():
                 stock = Stock_Prices_Weekly(
-                    stock_id=stock_id,
+                    Stock_id=stock_id,
                     Date=row['Date'],
                     Price=row['Price'],
                     EPS=row['EPS'],

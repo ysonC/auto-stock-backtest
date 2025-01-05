@@ -46,7 +46,7 @@ class CRUDHelper:
             return (
                 self.session.query(Stock_Prices_Weekly)
                 .filter_by(stock_id=stock_id)
-                .order_by(desc(Stock_Prices_Weekly.Date))
+                .order_by(desc(Stock_Prices_Weekly.date))
                 .first()
             )
         except Exception as e:
@@ -133,7 +133,7 @@ class CRUDHelper:
             df['PER'] = pd.to_numeric(df['PER'], errors='coerce')
 
             # Filter data to include only new entries
-            df = df[df['Date'] > latest_stock.Date]
+            df = df[df['Date'] > latest_stock.date]
             if df.empty:
                 logging.info(f"No new data for stock {stock_id}.")
                 return True

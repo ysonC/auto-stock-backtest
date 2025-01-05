@@ -45,7 +45,7 @@ class CRUDHelper:
         try:
             return (
                 self.session.query(Stock_Prices_Weekly)
-                .filter_by(Stock_id=stock_id)
+                .filter_by(stock_id=stock_id)
                 .order_by(desc(Stock_Prices_Weekly.Date))
                 .first()
             )
@@ -61,8 +61,8 @@ class CRUDHelper:
         try:
             return (
                 self.session.query(Stock_Prices_Weekly)
-                .filter_by(Stock_id=stock_id)
-                .order_by(desc(Stock_Prices_Weekly.Date))
+                .filter_by(stock_id=stock_id)
+                .order_by(desc(Stock_Prices_Weekly.date))
                 .all()
             )
         except Exception as e:
@@ -98,9 +98,9 @@ class CRUDHelper:
                 # Insert new rows into the database
                 for _, row in df.iterrows():
                     stock = Stock_Prices_Weekly(
-                        Stock_id=stock_id,
-                        Date=row['Date'],
-                        Price=row['Price'],
+                        stock_id=stock_id,
+                        date=row['Date'],
+                        price=row['Price'],
                         EPS=row['EPS'],
                         PER=row['PER']
                     )
@@ -116,8 +116,8 @@ class CRUDHelper:
                 most_recent_weekday = today
 
             # Compare the latest stock date with the most recent weekday
-            logging.info(f"Comparing latest_stock.Date: {latest_stock.Date} with most_recent_weekday: {most_recent_weekday}")
-            if latest_stock.Date == most_recent_weekday:
+            logging.info(f"Comparing latest_stock.Date: {latest_stock.date} with most_recent_weekday: {most_recent_weekday}")
+            if latest_stock.date == most_recent_weekday:
                 logging.info(f"Stock {stock_id} data is up-to-date. No update required.")
                 return True
             
@@ -141,9 +141,9 @@ class CRUDHelper:
             # Insert new rows into the database
             for _, row in df.iterrows():
                 stock = Stock_Prices_Weekly(
-                    Stock_id=stock_id,
-                    Date=row['Date'],
-                    Price=row['Price'],
+                    stock_id=stock_id,
+                    date=row['Date'],
+                    price=row['Price'],
                     EPS=row['EPS'],
                     PER=row['PER']
                 )

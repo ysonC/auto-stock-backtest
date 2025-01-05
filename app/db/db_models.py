@@ -10,13 +10,13 @@ Base = declarative_base()
     # id = Column(Integer, primary_key=True)
 class Stock_Prices_Weekly(Base):
     __tablename__ = 'stock_prices_weekly'
-    Stock_id = Column(Numeric(12, 2), nullable=False)
-    Date = Column(Date, nullable=False)
-    Price = Column(Numeric(12, 2))
+    stock_id = Column(Numeric(12, 2), nullable=False)
+    date = Column(Date, nullable=False)
+    price = Column(Numeric(12, 2))
     EPS = Column(Numeric(12, 2))
     PER = Column(Numeric(12, 2))
     __table_args__ = (
-        PrimaryKeyConstraint('Stock_id', 'Date'),
+        PrimaryKeyConstraint('stock_id', 'date'),
     )
     def __repr__(self):
-        return f"<Stock(id={self.Stock_id}, Date={self.Date}, Price={self.Price}, EPS={self.EPS}, PER={self.PER})>"
+        return f"<Stock(id={self.stock_id}, Date={self.date}, Price={self.price}, EPS={self.EPS}, PER={self.PER})>"

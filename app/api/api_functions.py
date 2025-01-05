@@ -30,9 +30,9 @@ def get_stock_data():
     # Serialize the results
     result = [
         {
-            "Stock_id": stock.Stock_id,
-            "Date": stock.Date.isoformat(),
-            "Price": stock.Price,
+            "stock_id": stock.stock_id,
+            "date": stock.date.isoformat(),
+            "price": stock.price,
             "EPS": stock.EPS,
             "PER": stock.PER
         }
@@ -54,9 +54,9 @@ def update_stock_data():
     # Serialize the results
     result = [
         {
-            "Stock_id": stock.Stock_id,
-            "Date": stock.Date.isoformat(),
-            "Price": stock.Price,
+            "stock_id": stock.stock_id,
+            "date": stock.date.isoformat(),
+            "Price": stock.price,
             "EPS": stock.EPS,
             "PER": stock.PER
         }

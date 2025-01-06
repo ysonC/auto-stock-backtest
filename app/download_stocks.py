@@ -12,6 +12,8 @@ from halo import Halo
 from app.helpers import *
 from app.config import DOWNLOAD_DIR, WEB_CHROMEDRIVER_PATH
 
+MAX_PER = 1000000
+MAX_EPS = 1000000
 
 def get_service():
     try:
@@ -132,6 +134,11 @@ def download_stock_data(stock_numbers):
                 df = df.dropna(how='all')
                 # Remove rows with 53rd week
                 df = df[~df['Date'].str.endswith('W53')]
+                # Convert EPS and PER to numeric and filter out rows where values are over 100000
+                df['EPS'] = pd.to_numeric(df['EPS'], errors='coerce')
+                df['PER'] = pd.to_numeric(df['PER'], errors='coerce')
+                df = df[(df['EPS'] <= MAX_EPS) & (df['PER'] <= MAX_PER)]
+                
                 save_to_csv(df, output_file_path, False)
                 logging.info(
                     f"Downloaded and saved data for stock {stock_number} to {output_file_path}.")

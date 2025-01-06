@@ -77,7 +77,7 @@ class CRUDHelper:
         try:
             # Fetch the latest stock info
             latest_stock = self.get_latest_stock_info(stock_id)
-            
+
             # If no data exists, download everything
             if not latest_stock:
                 logging.info(
@@ -87,7 +87,7 @@ class CRUDHelper:
                     logging.error(
                         f"Stock {stock_id} not found. Download failed.")
                     return False
-                
+
                 # Read and parse the downloaded data
                 df = read_csv(DOWNLOAD_DIR / f"{stock_id}.csv")
                 df['Date'] = df['Date'].apply(parse_custom_date)
@@ -107,20 +107,23 @@ class CRUDHelper:
                     self.session.add(stock)
                 self.session.commit()
                 return True
-            
+
             # Check if the data is up-to-date with the most recent weekday
             today = datetime.now().date()
             if today.weekday() >= 5:  # 5 = Saturday, 6 = Sunday
-                most_recent_weekday = today - timedelta(days=today.weekday() - 4)
+                most_recent_weekday = today - \
+                    timedelta(days=today.weekday() - 4)
             else:
                 most_recent_weekday = today
 
             # Compare the latest stock date with the most recent weekday
-            logging.info(f"Comparing latest_stock.Date: {latest_stock.date} with most_recent_weekday: {most_recent_weekday}")
+            logging.info(
+                f"Comparing latest_stock.Date: {latest_stock.date} with most_recent_weekday: {most_recent_weekday}")
             if latest_stock.date == most_recent_weekday:
-                logging.info(f"Stock {stock_id} data is up-to-date. No update required.")
+                logging.info(
+                    f"Stock {stock_id} data is up-to-date. No update required.")
                 return True
-            
+
             # Download the latest data
             download_stock_data([stock_id])
             downloaded_file_path = f"app/data/raw/{stock_id}.csv"
@@ -155,10 +158,10 @@ class CRUDHelper:
             logging.error(f"Error updating stock {stock_id}: {e}")
             self.session.rollback()
             return False
-        
+
         finally:
             self.session.close()
- 
+
     def close(self):
         """Close the session."""
         self.session.close()

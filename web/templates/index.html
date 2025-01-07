@@ -63,8 +63,8 @@
             if (stock) {
                 latestStockDiv.innerHTML = `
                     <h3>Latest Stock Data</h3>
-                    <p>Date: ${stock.Date}</p>
-                    <p>Price: ${stock.Price || "N/A"}</p>
+                    <p>Date: ${stock.date}</p>
+                    <p>Price: ${stock.price || "N/A"}</p>
                     <p>EPS: ${stock.EPS || "N/A"}</p>
                     <p>PER: ${stock.PER || "N/A"}</p>
                 `;
@@ -93,8 +93,8 @@
                                 .map(
                                     (stock) => `
                                     <tr>
-                                        <td>${stock.Date}</td>
-                                        <td>${stock.Price || "N/A"}</td>
+                                        <td>${stock.date}</td>
+                                        <td>${stock.price || "N/A"}</td>
                                         <td>${stock.EPS || "N/A"}</td>
                                         <td>${stock.PER || "N/A"}</td>
                                     </tr>

@@ -18,7 +18,7 @@ setup(
         "webdriver-manager",
         "sqlalchemy",
         "Flask-SQLAlchemy",
-        "psycopg2"
+        "psycopg2-binary"
     ],
     entry_points={
         "console_scripts": [

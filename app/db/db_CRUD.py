@@ -71,6 +71,23 @@ class CRUDHelper:
         finally:
             self.session.close()
 
+    def get_5_years_stock_info(self, stock_id):
+        """Fetch 5 years of stock information for a given stock symbol."""
+        logging.info(f"Fetching 5 years of stock info for {stock_id}")
+        try:
+            return (
+                self.session.query(Stock_Prices_Weekly)
+                .filter_by(stock_id=stock_id)
+                .order_by(desc(Stock_Prices_Weekly.date))
+                .limit(260)
+                .all()
+            )
+        except Exception as e:
+            logging.error(f"Error fetching 5 years of stock info: {e}")
+            return None
+        finally:
+            self.session.close()
+
     def update_stock_data(self, stock_id):
         """Check and update 
         tock data for a given stock symbol."""

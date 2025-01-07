@@ -1,11 +1,22 @@
+from decimal import Decimal
 import pandas as pd
 import os
 import logging
 from .helpers import *
 from .config import PROCESS_DATA_PATH, STOCK_DATA_DIR, OUTPUT_DATA_PATH
+from app.db.db_CRUD import CRUDHelper
+from app.logging import setup_logging
 
+setup_logging(debug_mode=True)
 
 NaN_THRESHOLD = 0.2
+
+# Get database URL from environment variable
+DATABASE_URL = os.getenv("DATABASE_URL")
+if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+# Initialize CRUDHelper
+crud_helper = CRUDHelper(database_url=DATABASE_URL)
 
 
 def median_reversion_calculation(data, weeks, median_per, quartile_per):
@@ -61,67 +72,43 @@ def median_reversion_calculation(data, weeks, median_per, quartile_per):
 
 
 def process_stocks(stock_numbers):
-    """
-    Process selected stocks for backtesting Median Reversion (MR) success rates.
-
-    Args:
-    - stock_numbers (list): List of stock numbers to process.
-    """
     logging.info(f"Processing stocks: {stock_numbers}")
-
-    create_folder(STOCK_DATA_DIR)
-
-    # Load process_data.csv
-    process_data_df = read_csv(PROCESS_DATA_PATH)
-    if process_data_df is None:
-        logging.error("Failed to read process_data.csv. Exiting.")
-        return
 
     result_list = []
 
-    # Loop through each stock number
     for stock_id in stock_numbers:
         logging.info(f"Processing stock: {stock_id}")
-        stock_file_path = os.path.join(STOCK_DATA_DIR, f"{stock_id}.csv")
 
-        # Check if stock file exists
-        if not os.path.exists(stock_file_path):
-            logging.warning(
-                f"Stock file for {stock_id} not found in {STOCK_DATA_DIR}. Skipping.")
+        # Fetch 5 years of stock data from the database
+        stocks = crud_helper.get_5_years_stock_info(stock_id)
+        if not stocks:
+            logging.warning(f"No data found for stock {stock_id}. Skipping.")
             continue
 
-        # Load the stock CSV
-        stock_data_df = read_csv(stock_file_path)
-        if stock_data_df is None:
-            logging.error(
-                f"Failed to read data for stock {stock_id}. Skipping.")
-            continue
+        # Convert the fetched data to a DataFrame
+        stock_data_df = pd.DataFrame([{
+            "Date": stock.date,
+            "Price": float(stock.price) if isinstance(stock.price, Decimal) else stock.price,
+            "EPS": float(stock.EPS) if isinstance(stock.EPS, Decimal) else stock.EPS,
+            "PER": float(stock.PER) if isinstance(stock.PER, Decimal) else stock.PER
+        } for stock in stocks])
 
-        # Reverse data for chronological order
-        stock_data_df = stock_data_df.iloc[::-1].reset_index(drop=True)
+        # Ensure the data is sorted chronologically
+        stock_data_df = stock_data_df.sort_values(
+            by="Date").reset_index(drop=True)
 
-        # Filter the process_data_df for the current stock
-        stock_row = process_data_df[process_data_df["Stock ID"].astype(
-            str) == stock_id]
-        if stock_row.empty:
-            logging.warning(
-                f"No matching stock ID for {stock_id} in process_data.csv. Skipping.")
-            continue
-
-        # S => Z information
-        median_per = stock_row["GEP MED"].iloc[0]
-        current_per = stock_row["Current PER"].iloc[0]
-        quartile_per = stock_row["GEP.25"].iloc[0]
-
-        # S T V
-        current_price = stock_row["Price"].iloc[0]
+        # Calculate required statistics
+        median_per = stock_data_df["PER"].median()  # Median PER
+        quartile_per = stock_data_df["PER"].quantile(
+            0.25)  # 25th percentile PER
+        current_per = stock_data_df["PER"].iloc[-1]  # Most recent PER
+        current_price = stock_data_df["Price"].iloc[-1]  # Most recent price
         median_price = (median_per / current_per) * \
             current_price if current_per != 0 else None
         mp_updown = (median_price - current_price) / \
             current_price if current_price != 0 else None
 
         # Perform Median Reversion backtests
-        # W X Y Z
         MR_1_month, MR_cases_1_month = median_reversion_calculation(
             stock_data_df, 4, median_per, quartile_per)
         MR_2_month, MR_cases_2_month = median_reversion_calculation(
@@ -130,7 +117,7 @@ def process_stocks(stock_numbers):
             stock_data_df, 12, median_per, quartile_per)
         avg_mr = pd.Series([MR_1_month, MR_2_month, MR_3_month]).mean()
 
-        # AB => AG
+        # Calculate Kelly Criterion and verdict
         kelly = (avg_mr * (mp_updown + 1) - 1) / \
             mp_updown if mp_updown != 0 else None
         verdict = False
@@ -140,18 +127,16 @@ def process_stocks(stock_numbers):
         # Append the results to the list
         result_list.append({
             "Stock ID": stock_id,
-            "C$": current_price,
-            "M$": median_price,
+            "C$": round(current_price, 2) if current_price is not None else None,
+            "M$": round(median_price, 2) if median_price is not None else None,
             "T$": "####",  # Leave blank
-            "MP UpDown": mp_updown,
-            "1M MR": MR_1_month,
-            "2M MR": MR_2_month,
-            "3M MR": MR_3_month,
-            "Avg.": avg_mr,
-            "####": "####",  # Leave blank
-            "Kelly": kelly,
+            "MP UpDown": round(mp_updown, 2) if mp_updown is not None else None,
+            "1M MR": round(MR_1_month, 2) if MR_1_month is not None else None,
+            "2M MR": round(MR_2_month, 2) if MR_2_month is not None else None,
+            "3M MR": round(MR_3_month, 2) if MR_3_month is not None else None,
+            "Avg.": round(avg_mr, 2) if avg_mr is not None else None,
+            "Kelly": round(kelly, 2) if kelly is not None else None,
             "Verdict": verdict,
-            "#####": "#####",  # Leave blank
             "1M Incident": MR_cases_1_month,
             "2M Incident": MR_cases_2_month,
             "3M Incident": MR_cases_3_month

@@ -1,64 +1,83 @@
 <!DOCTYPE html>
 <html>
-  <head>
+<head>
     <title>Stock Data Fetcher</title>
     <script>
-      // Function to fetch the latest stock data
-      async function fetchLatestStock(event) {
-        event.preventDefault(); // Prevent form submission
+        // Function to fetch the latest stock data
+        async function fetchLatestStock(event) {
+            event.preventDefault(); // Prevent form submission
 
-        const stockId = document.getElementById("latest_stock_id").value;
-        const response = await fetch(`/api/stock?stock_id=${stockId}&limit=1`);
+            const stockId = document.getElementById("latest_stock_id").value;
+            const response = await fetch(`/api/stock?stock_id=${stockId}&limit=1`);
 
-        if (response.ok) {
-          const data = await response.json();
-          displayLatestStock(data[0]); // Display the first item from the list
-        } else {
-          displayError("Failed to fetch latest stock data.");
+            if (response.ok) {
+                const data = await response.json();
+                displayLatestStock(data[0]); // Display the first item from the list
+            } else {
+                displayError("Failed to fetch latest stock data.");
+            }
         }
-      }
 
-      // Function to fetch all stock data
-      async function fetchAllStocks(event) {
-        event.preventDefault(); // Prevent form submission
+        // Function to fetch all stock data
+        async function fetchAllStocks(event) {
+            event.preventDefault(); // Prevent form submission
 
-        const stockId = document.getElementById("fetch_stock_id").value;
-        const limit = document.getElementById("limit").value;
-        const offset = document.getElementById("offset").value;
+            const stockId = document.getElementById("fetch_stock_id").value;
+            const limit = document.getElementById("limit").value;
+            const offset = document.getElementById("offset").value;
 
-        const response = await fetch(
-          `/api/stock?stock_id=${stockId}&limit=${limit}&offset=${offset}`
-        );
+            const response = await fetch(
+                `/api/stock?stock_id=${stockId}&limit=${limit}&offset=${offset}`
+            );
 
-        if (response.ok) {
-          const data = await response.json();
-          displayAllStocks(data); // Display the list of stocks
-        } else {
-          displayError("Failed to fetch all stock data.");
+            if (response.ok) {
+                const data = await response.json();
+                displayAllStocks(data); // Display the list of stocks
+            } else {
+                displayError("Failed to fetch all stock data.");
+            }
         }
-      }
 
-      // Function to display the latest stock
-      function displayLatestStock(stock) {
-        const latestStockDiv = document.getElementById("latest-stock-data");
-        if (stock) {
-          latestStockDiv.innerHTML = `
+        // Function to perform a backtest
+        async function performBacktest(event) {
+            event.preventDefault(); // Prevent form submission
+
+            const stockIds = document.getElementById("backtest_stock_ids").value.split(",");
+            const response = await fetch("/api/stock/backtest", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ stock_numbers: stockIds }),
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                displayBacktestResults(data);
+            } else {
+                displayError("Failed to perform backtest.");
+            }
+        }
+
+        // Function to display the latest stock
+        function displayLatestStock(stock) {
+            const latestStockDiv = document.getElementById("latest-stock-data");
+            if (stock) {
+                latestStockDiv.innerHTML = `
                     <h3>Latest Stock Data</h3>
                     <p>Date: ${stock.Date}</p>
                     <p>Price: ${stock.Price || "N/A"}</p>
                     <p>EPS: ${stock.EPS || "N/A"}</p>
                     <p>PER: ${stock.PER || "N/A"}</p>
                 `;
-        } else {
-          latestStockDiv.innerHTML = `<p>No stock data found.</p>`;
+            } else {
+                latestStockDiv.innerHTML = `<p>No stock data found.</p>`;
+            }
         }
-      }
 
-      // Function to display all stocks
-      function displayAllStocks(stocks) {
-        const allStocksTable = document.getElementById("all-stocks-data");
-        if (stocks.length > 0) {
-          allStocksTable.innerHTML = `
+        // Function to display all stocks
+        function displayAllStocks(stocks) {
+            const allStocksTable = document.getElementById("all-stocks-data");
+            if (stocks.length > 0) {
+                allStocksTable.innerHTML = `
                     <h3>All Stock Data</h3>
                     <table border="1" cellspacing="0" cellpadding="5">
                         <thead>
@@ -71,40 +90,82 @@
                         </thead>
                         <tbody>
                             ${stocks
-                              .map(
-                                (stock) => `
-                                <tr>
-                                    <td>${stock.Date}</td>
-                                    <td>${stock.Price || "N/A"}</td>
-                                    <td>${stock.EPS || "N/A"}</td>
-                                    <td>${stock.PER || "N/A"}</td>
-                                </tr>
-                            `
-                              )
-                              .join("")}
+                                .map(
+                                    (stock) => `
+                                    <tr>
+                                        <td>${stock.Date}</td>
+                                        <td>${stock.Price || "N/A"}</td>
+                                        <td>${stock.EPS || "N/A"}</td>
+                                        <td>${stock.PER || "N/A"}</td>
+                                    </tr>
+                                `
+                                )
+                                .join("")}
                         </tbody>
                     </table>
                 `;
-        } else {
-          allStocksTable.innerHTML = `<p>No stock data found.</p>`;
+            } else {
+                allStocksTable.innerHTML = `<p>No stock data found.</p>`;
+            }
         }
-      }
 
-      // Function to display errors
-      function displayError(message) {
-        const errorDiv = document.getElementById("error");
-        errorDiv.innerHTML = `<p style="color: red;">${message}</p>`;
-      }
+        // Function to display backtest results
+        function displayBacktestResults(results) {
+            const backtestDiv = document.getElementById("backtest-results");
+            if (results.length > 0) {
+                backtestDiv.innerHTML = `
+                    <h3>Backtest Results</h3>
+                    <table border="1" cellspacing="0" cellpadding="5">
+                        <thead>
+                            <tr>
+                                <th>Stock ID</th>
+                                <th>Kelly</th>
+                                <th>Verdict</th>
+                                <th>1M MR</th>
+                                <th>2M MR</th>
+                                <th>3M MR</th>
+                                <th>Avg.</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${results
+                                .map(
+                                    (result) => `
+                                    <tr>
+                                        <td>${result["Stock ID"]}</td>
+                                        <td>${result["Kelly"] || "N/A"}</td>
+                                        <td>${result["Verdict"] ? "Yes" : "No"}</td>
+                                        <td>${result["1M MR"] || "N/A"}</td>
+                                        <td>${result["2M MR"] || "N/A"}</td>
+                                        <td>${result["3M MR"] || "N/A"}</td>
+                                        <td>${result["Avg."] || "N/A"}</td>
+                                    </tr>
+                                `
+                                )
+                                .join("")}
+                        </tbody>
+                    </table>
+                `;
+            } else {
+                backtestDiv.innerHTML = `<p>No backtest results found.</p>`;
+            }
+        }
+
+        // Function to display errors
+        function displayError(message) {
+            const errorDiv = document.getElementById("error");
+            errorDiv.innerHTML = `<p style="color: red;">${message}</p>`;
+        }
     </script>
-  </head>
-  <body>
+</head>
+<body>
     <h1>I Fetch Stock Data!!!!</h1>
 
     <!-- Form for fetching the latest stock data -->
     <form id="latest-stock-form" onsubmit="fetchLatestStock(event)">
-      <label for="latest_stock_id">Enter Stock ID for latest info:</label>
-      <input type="text" id="latest_stock_id" required />
-      <button type="submit">Fetch Latest Stock Info</button>
+        <label for="latest_stock_id">Enter Stock ID for latest info:</label>
+        <input type="text" id="latest_stock_id" required />
+        <button type="submit">Fetch Latest Stock Info</button>
     </form>
     <div id="latest-stock-data"></div>
 
@@ -112,19 +173,29 @@
 
     <!-- Form for fetching all stock data -->
     <form id="all-stocks-form" onsubmit="fetchAllStocks(event)">
-      <label for="fetch_stock_id">Enter Stock ID for all info:</label>
-      <input type="text" id="fetch_stock_id" required />
-      <label for="limit">Limit:</label>
-      <input type="number" id="limit" min="1" max="100" value="100" />
-      <label for="offset">Offset:</label>
-      <input type="number" id="offset" min="0" value="0" />
-      <button type="submit">Fetch All Stock Info</button>
+        <label for="fetch_stock_id">Enter Stock ID for all info:</label>
+        <input type="text" id="fetch_stock_id" required />
+        <label for="limit">Limit:</label>
+        <input type="number" id="limit" min="1" max="100" value="100" />
+        <label for="offset">Offset:</label>
+        <input type="number" id="offset" min="0" value="0" />
+        <button type="submit">Fetch All Stock Info</button>
     </form>
     <div id="all-stocks-data"></div>
 
     <hr />
 
+    <!-- Form for backtesting -->
+    <form id="backtest-form" onsubmit="performBacktest(event)">
+        <label for="backtest_stock_ids">Enter Stock IDs for backtest (comma-separated):</label>
+        <input type="text" id="backtest_stock_ids" required />
+        <button type="submit">Perform Backtest</button>
+    </form>
+    <div id="backtest-results"></div>
+
+    <hr />
+
     <!-- Error messages -->
     <div id="error"></div>
-  </body>
+</body>
 </html>

@@ -5,8 +5,7 @@ input_stock
 chromedriver
 .DS_Store
 auto_stock_backtest.egg-info/
-app/data/results
-app/data/stock_data
+app/data/
 logs/
 .env
 .idea

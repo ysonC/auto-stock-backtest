@@ -2,10 +2,10 @@ from decimal import Decimal
 import pandas as pd
 import os
 import logging
-from .helpers import *
-from .config import PROCESS_DATA_PATH, STOCK_DATA_DIR, OUTPUT_DATA_PATH
+from app.helpers import *
+from app.config import PROCESS_DATA_PATH, STOCK_DATA_DIR, OUTPUT_DATA_PATH
 from app.db.db_CRUD import CRUDHelper
-from app.logging import setup_logging
+from app.app_logging import setup_logging
 
 setup_logging(debug_mode=True)
 
@@ -49,7 +49,7 @@ def median_reversion_calculation(data, weeks, median_per, quartile_per):
     if total_NaN / len(data) > NaN_THRESHOLD:
         logging.warning(
             f"NaN values exceed the threshold of {NaN_THRESHOLD * 100}%. Returning NaN.")
-        return float('nan')
+        return float('nan'), 0
 
     for i in range(len(data) - weeks):
         enter_PER = data["PER"].iloc[i]

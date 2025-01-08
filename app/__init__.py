@@ -2,7 +2,7 @@ from .download_stocks import download_stock_data, read_stock_numbers_from_file, 
 from .clean_data import clean_downloaded_stocks
 from .backtest import process_stocks
 from .helpers import save_to_csv, create_folder, read_excel, read_csv, run_process, check_all_folders, parse_custom_date
-from .logging import setup_logging, log_separator
+from .app_logging import setup_logging, log_separator
 from .config import (
     BASE_DIR,
     DATA_DIR,

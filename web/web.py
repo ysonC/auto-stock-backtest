@@ -1,7 +1,7 @@
 from flask import Flask, render_template    
 from app.api.api_functions import api  # Import the API blueprint
 
-from app.logging import setup_logging
+from app.app_logging import setup_logging
 
 app = Flask(__name__)
 

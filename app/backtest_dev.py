@@ -41,9 +41,9 @@ def median_reversion_calculation(data, weeks, median_per, quartile_per):
     total_improve_median = 0
 
     # Convert PER to numeric
-    data['PER'] = pd.to_numeric(data['PER'], errors='coerce')
+    data["PER"] = pd.to_numeric(data["PER"], errors="coerce")
     total_NaN = 0
-    total_NaN = data['PER'].isna().sum()
+    total_NaN = data["PER"].isna().sum()
 
     # Check if NaN values exceed the threshold
     if total_NaN / len(data) > NaN_THRESHOLD:
@@ -96,30 +96,25 @@ def process_stocks(stock_numbers):
         # Ensure the data is sorted chronologically
         stock_data_df = stock_data_df.sort_values(
             by="Date").reset_index(drop=True)
-
         # Calculate required statistics
-        median_per = stock_data_df["PER"].median()  # Median PER
-        quartile_per = stock_data_df["PER"].quantile(
-            0.25)  # 25th percentile PER
+        median_per = stock_data_df["PER"].median()
+        quartile_per = stock_data_df["PER"].quantile(0.25)  # 25th percentile PER
         current_per = stock_data_df["PER"].iloc[-1]  # Most recent PER
         current_price = stock_data_df["Price"].iloc[-1]  # Most recent price
-        median_price = (median_per / current_per) * \
-            current_price if current_per != 0 else None
-        mp_updown = (median_price - current_price) / \
-            current_price if current_price != 0 else None
+        median_price = (median_per / current_per) * current_price if current_per != 0 else None
+        new_median = stock_data_df["Price"].median()
+        print(median_price)
+        print(new_median)
+        mp_updown = (median_price - current_price) / current_price if current_price != 0 else None
 
         # Perform Median Reversion backtests
-        MR_1_month, MR_cases_1_month = median_reversion_calculation(
-            stock_data_df, 4, median_per, quartile_per)
-        MR_2_month, MR_cases_2_month = median_reversion_calculation(
-            stock_data_df, 8, median_per, quartile_per)
-        MR_3_month, MR_cases_3_month = median_reversion_calculation(
-            stock_data_df, 12, median_per, quartile_per)
+        MR_1_month, MR_cases_1_month = median_reversion_calculation(stock_data_df, 4, median_per, quartile_per)
+        MR_2_month, MR_cases_2_month = median_reversion_calculation(stock_data_df, 8, median_per, quartile_per)
+        MR_3_month, MR_cases_3_month = median_reversion_calculation(stock_data_df, 12, median_per, quartile_per)
         avg_mr = pd.Series([MR_1_month, MR_2_month, MR_3_month]).mean()
 
         # Calculate Kelly Criterion and verdict
-        kelly = (avg_mr * (mp_updown + 1) - 1) / \
-            mp_updown if mp_updown != 0 else None
+        kelly = (avg_mr * (mp_updown + 1) - 1) / mp_updown if mp_updown != 0 else None
         verdict = False
         if mp_updown > 0 and avg_mr > 0.84:
             verdict = True
@@ -152,10 +147,16 @@ def process_stocks(stock_numbers):
 
 if __name__ == "__main__":
     logging.info("Script execution started.")
-    stock_numbers = ["1213", "2330", "2303"]  # Example stock numbers
+    # stock_numbers = ["1213", "2330", "2303"]  # Example stock numbers
+    stock_numbers = ["3406"]  # Example stock numbers
     try:
-        process_stocks(stock_numbers)
+        print(process_stocks(stock_numbers))
     except Exception as e:
         logging.critical(
             f"Unhandled exception during processing: {e}", exc_info=True)
     logging.info("Script execution finished.")
+
+"""
+mp = (median price - current price) / current price 
+kelly = (avg(mp + 1) - 1) / mp
+"""

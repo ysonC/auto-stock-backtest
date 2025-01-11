@@ -137,3 +137,20 @@ def perform_backtest():
             return jsonify({"error": "No results generated"}), 500
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+@api.route('/upload', methods=['POST'])
+def upload_excel_data():
+    try:
+        # Get JSON data from the request
+        data = request.get_json()
+        if not data:
+            return jsonify({"status": "error", "message": "No data provided"}), 400
+        
+        # Process the data (example: print it)
+        print("Received data:", data)
+        
+        # Respond with success
+        return jsonify({"status": "success", "message": "Data received successfully"})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500

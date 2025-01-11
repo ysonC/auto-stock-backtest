@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Stock Data Fetcher</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script>
         // Function to fetch the latest stock data
         async function fetchLatestStock(event) {
@@ -90,8 +92,8 @@
                         </thead>
                         <tbody>
                             ${stocks
-                                .map(
-                                    (stock) => `
+                        .map(
+                            (stock) => `
                                     <tr>
                                         <td>${stock.date}</td>
                                         <td>${stock.price || "N/A"}</td>
@@ -99,8 +101,8 @@
                                         <td>${stock.PER || "N/A"}</td>
                                     </tr>
                                 `
-                                )
-                                .join("")}
+                        )
+                        .join("")}
                         </tbody>
                     </table>
                 `;
@@ -129,8 +131,8 @@
                         </thead>
                         <tbody>
                             ${results
-                                .map(
-                                    (result) => `
+                        .map(
+                            (result) => `
                                     <tr>
                                         <td>${result["Stock ID"]}</td>
                                         <td>${result["Kelly"] || "N/A"}</td>
@@ -141,13 +143,63 @@
                                         <td>${result["Avg."] || "N/A"}</td>
                                     </tr>
                                 `
-                                )
-                                .join("")}
+                        )
+                        .join("")}
                         </tbody>
                     </table>
                 `;
             } else {
                 backtestDiv.innerHTML = `<p>No backtest results found.</p>`;
+            }
+        }
+        // Function to process the uploaded Excel file
+        async function processExcelFile(event) {
+            event.preventDefault(); // Prevent form submission
+            console.log("processExcelFile triggered");
+
+            const fileInput = document.getElementById("excelFile");
+            if (!fileInput.files[0]) {
+                displayError("Please select an Excel file first.");
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function (e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: "array" });
+
+                // Convert the first sheet to JSON
+                const sheetName = workbook.SheetNames[0];
+                const sheetData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+
+                // Send data to Flask backend
+                sendDataToBackend(sheetData);
+            };
+
+            reader.readAsArrayBuffer(file);
+        }
+
+        async function sendDataToBackend(data) {
+            console.log(data);
+            try {
+                const response = await fetch("/api/upload", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(data),
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    alert("Excel data successfully uploaded and processed!");
+                } else {
+                    displayError("Failed to upload Excel data.");
+                }
+            } catch (error) {
+                displayError(`Error: ${error.message}`);
             }
         }
 
@@ -158,6 +210,7 @@
         }
     </script>
 </head>
+
 <body>
     <h1>I Fetch Stock Data!!!!</h1>
 
@@ -170,6 +223,13 @@
     <div id="latest-stock-data"></div>
 
     <hr />
+
+    <!-- Form for uploading and processing Excel file -->
+    <form id="excel-upload-form" onsubmit="processExcelFile(event)">
+        <label for="excelFile">Upload Excel file:</label>
+        <input type="file" id="excelFile" accept=".xls,.xlsx" required />
+        <button type="submit">Upload and Process</button>
+    </form>
 
     <!-- Form for fetching all stock data -->
     <form id="all-stocks-form" onsubmit="fetchAllStocks(event)">
@@ -198,4 +258,5 @@
     <!-- Error messages -->
     <div id="error"></div>
 </body>
+
 </html>

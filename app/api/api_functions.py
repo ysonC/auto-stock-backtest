@@ -1,8 +1,9 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, Response
 from app.db.db_CRUD import CRUDHelper
 import os
 from app.config import INPUT_STOCK_DIR
 from app.backtest_dev import process_stocks
+import pandas as pd
 
 # Get database URL from environment variable
 DATABASE_URL = os.getenv("DATABASE_URL")
@@ -24,50 +25,48 @@ def get_stock_data():
     offset = request.args.get("offset", 0, type=int)
 
     if not stock_id:
-        return jsonify({"error": "Stock ID is required"}), 400
+        return Response('{"error": "Stock ID is required"}', status=400, mimetype='application/json')
 
     stocks = crud_helper.get_all_stock_info(stock_id)
     if not stocks:
-        return jsonify({"error": "No stocks found"}), 404
+        return Response('{"error": "No stocks found"}', status=404, mimetype='application/json')
 
     # Serialize the results
-    result = [
-        {
-            "stock_id": stock.stock_id,
-            "date": stock.date.isoformat(),
-            "price": stock.price,
-            "EPS": stock.EPS,
-            "PER": stock.PER
-        }
-        for stock in stocks[offset:offset + limit]
-    ]
-    return jsonify(result), 200
+    result_df = pd.DataFrame([{
+        "stock_id": stock.stock_id,
+        "date": stock.date.isoformat(),
+        "price": stock.price,
+        "EPS": stock.EPS,
+        "PER": stock.PER
+    } for stock in stocks[offset:offset + limit]])
+
+    result_json = result_df.to_json(orient='records')
+    return Response(result_json, status=200, mimetype='application/json')
 
 
 @api.route('/stock/5years', methods=['GET'])
 def get_stock_data_5years():
-    """Fetch all stock data with pagination."""
+    """Fetch 5 years of stock data."""
     stock_id = request.args.get("stock_id", type=int)
 
     if not stock_id:
-        return jsonify({"error": "Stock ID is required"}), 400
+        return Response('{"error": "Stock ID is required"}', status=400, mimetype='application/json')
 
     stocks = crud_helper.get_5_years_stock_info(stock_id)
     if not stocks:
-        return jsonify({"error": "No stocks found"}), 404
+        return Response('{"error": "No stocks found"}', status=404, mimetype='application/json')
 
     # Serialize the results
-    result = [
-        {
-            "stock_id": stock.stock_id,
-            "date": stock.date.isoformat(),
-            "price": stock.price,
-            "EPS": stock.EPS,
-            "PER": stock.PER
-        }
-        for stock in stocks
-    ]
-    return jsonify(result), 200
+    result_df = pd.DataFrame([{
+        "stock_id": stock.stock_id,
+        "date": stock.date.isoformat(),
+        "price": stock.price,
+        "EPS": stock.EPS,
+        "PER": stock.PER
+    } for stock in stocks])
+
+    result_json = result_df.to_json(orient='records')
+    return Response(result_json, status=200, mimetype='application/json')
 
 
 @api.route('/stock/update', methods=['POST'])
@@ -76,23 +75,21 @@ def update_stock_data():
     stock_id = request.args.get("stock_id", type=int)
 
     if not stock_id:
-        return jsonify({"error": "Stock ID is required"}), 400
+        return Response('{"error": "Stock ID is required"}', status=400, mimetype='application/json')
 
     crud_helper.update_stock_data(stock_id)
 
     stocks = crud_helper.get_all_stock_info(stock_id)
-    # Serialize the results
-    result = [
-        {
-            "stock_id": stock.stock_id,
-            "date": stock.date.isoformat(),
-            "Price": stock.price,
-            "EPS": stock.EPS,
-            "PER": stock.PER
-        }
-        for stock in stocks
-    ]
-    return jsonify(result), 200
+    result_df = pd.DataFrame([{
+        "stock_id": stock.stock_id,
+        "date": stock.date.isoformat(),
+        "Price": stock.price,
+        "EPS": stock.EPS,
+        "PER": stock.PER
+    } for stock in stocks])
+
+    result_json = result_df.to_json(orient='records')
+    return Response(result_json, status=200, mimetype='application/json')
 
 
 @api.route('/stock/update_all', methods=['POST'])
@@ -110,8 +107,8 @@ def update_all_stock_data():
             error_stocks.append(stock_id)
 
     if error_stocks:
-        return jsonify({"error": f"Failed to update stocks: {error_stocks}"}), 500
-    return jsonify({"message": "Stock data updated successfully"}), 200
+        return Response(f'{{"error": "Failed to update stocks: {error_stocks}"}}', status=500, mimetype='application/json')
+    return Response('{"message": "Stock data updated successfully"}', status=200, mimetype='application/json')
 
 
 @api.route('/stock/backtest', methods=['POST'])
@@ -119,38 +116,41 @@ def perform_backtest():
     """Perform backtesting for Median Reversion strategy."""
     stock_numbers = request.json.get("stock_numbers", [])
 
-    # Convert all elements to integers
     try:
-        stock_numbers = list(map(int, stock_numbers))  # Using map
+        stock_numbers = list(map(int, stock_numbers))
     except ValueError:
-        return jsonify({"error": "Stock numbers must be integers"}), 400
+        return Response('{"error": "Stock numbers must be integers"}', status=400, mimetype='application/json')
 
     try:
-        # Call the process_stocks function
         result_df = process_stocks(stock_numbers)
 
-        # Convert result_df to JSON
         if result_df is not None:
-            result_json = result_df.to_dict(orient='records')
-            return jsonify(result_json), 200
+            result_json = result_df.to_json(orient='records')
+            return Response(result_json, status=200, mimetype='application/json')
         else:
-            return jsonify({"error": "No results generated"}), 500
+            return Response('{"error": "No results generated"}', status=500, mimetype='application/json')
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return Response(f'{{"error": "{str(e)}"}}', status=500, mimetype='application/json')
 
 
 @api.route('/upload', methods=['POST'])
 def upload_excel_data():
     try:
-        # Get JSON data from the request
         data = request.get_json()
         if not data:
-            return jsonify({"status": "error", "message": "No data provided"}), 400
-        
-        # Process the data (example: print it)
-        print("Received data:", data)
-        
-        # Respond with success
-        return jsonify({"status": "success", "message": "Data received successfully"})
+            return Response('{"status": "error", "message": "No data provided"}', status=400, mimetype='application/json')
+
+        tickers = [item['Ticker'] for item in data]
+        print("Tickers received:", tickers)
+
+        try:
+            result_df = process_stocks(tickers)
+
+            result_json = result_df.to_json(orient='records')
+            print("Result JSON:", result_json)
+            return Response(result_json, status=200, mimetype='application/json')
+        except Exception as e:
+            return Response(f'{{"status": "error", "message": "Processing error: {str(e)}"}}', status=500, mimetype='application/json')
+
     except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+        return Response(f'{{"status": "error", "message": "Invalid request: {str(e)}"}}', status=500, mimetype='application/json')

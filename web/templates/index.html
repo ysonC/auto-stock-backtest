@@ -5,83 +5,167 @@
     <title>Stock Data Fetcher</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script>
-        // Function to fetch the latest stock data
+        // Utility function to safely get a value or return "N/A"
+        function safeValue(value) {
+            return value === null || value === undefined ? "N/A" : value;
+        }
+
+        // Fetch the latest stock data
         async function fetchLatestStock(event) {
-            event.preventDefault(); // Prevent form submission
+            event.preventDefault();
 
-            const stockId = document.getElementById("latest_stock_id").value;
-            const response = await fetch(`/api/stock?stock_id=${stockId}&limit=1`);
+            const stockId = document.getElementById("latest_stock_id").value.trim();
+            if (!stockId) {
+                displayError("Please enter a valid Stock ID.");
+                return;
+            }
 
-            if (response.ok) {
-                const data = await response.json();
-                displayLatestStock(data[0]); // Display the first item from the list
-            } else {
-                displayError("Failed to fetch latest stock data.");
+            try {
+                const response = await fetch(`/api/stock?stock_id=${stockId}&limit=1`);
+                if (response.ok) {
+                    const data = await response.json();
+                    displayLatestStock(data[0] || null);
+                } else {
+                    displayError("Failed to fetch the latest stock data.");
+                }
+            } catch (error) {
+                displayError(`Error fetching latest stock data: ${error.message}`);
             }
         }
 
-        // Function to fetch all stock data
+        // Fetch all stock data
         async function fetchAllStocks(event) {
-            event.preventDefault(); // Prevent form submission
+            event.preventDefault();
 
-            const stockId = document.getElementById("fetch_stock_id").value;
-            const limit = document.getElementById("limit").value;
-            const offset = document.getElementById("offset").value;
+            const stockId = document.getElementById("fetch_stock_id").value.trim();
+            const limit = parseInt(document.getElementById("limit").value, 10);
+            const offset = parseInt(document.getElementById("offset").value, 10);
 
-            const response = await fetch(
-                `/api/stock?stock_id=${stockId}&limit=${limit}&offset=${offset}`
-            );
+            if (!stockId || limit <= 0 || offset < 0) {
+                displayError("Invalid input. Please ensure all fields are correctly filled.");
+                return;
+            }
 
-            if (response.ok) {
-                const data = await response.json();
-                displayAllStocks(data); // Display the list of stocks
-            } else {
-                displayError("Failed to fetch all stock data.");
+            try {
+                const response = await fetch(
+                    `/api/stock?stock_id=${stockId}&limit=${limit}&offset=${offset}`
+                );
+                if (response.ok) {
+                    const data = await response.json();
+                    displayAllStocks(data);
+                } else {
+                    displayError("Failed to fetch all stock data.");
+                }
+            } catch (error) {
+                displayError(`Error fetching all stock data: ${error.message}`);
             }
         }
 
-        // Function to perform a backtest
+        // Perform backtest
         async function performBacktest(event) {
-            event.preventDefault(); // Prevent form submission
+            event.preventDefault();
 
-            const stockIds = document.getElementById("backtest_stock_ids").value.split(",");
-            const response = await fetch("/api/stock/backtest", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ stock_numbers: stockIds }),
-            });
+            const stockIds = document.getElementById("backtest_stock_ids").value
+                .split(",")
+                .map((id) => id.trim())
+                .filter(Boolean);
 
-            if (response.ok) {
-                const data = await response.json();
-                displayBacktestResults(data);
-            } else {
-                displayError("Failed to perform backtest.");
+            if (stockIds.length === 0) {
+                displayError("Please enter at least one Stock ID.");
+                return;
+            }
+
+            try {
+                const response = await fetch("/api/stock/backtest", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ stock_numbers: stockIds }),
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    displayBacktestResults(data);
+                } else {
+                    displayError("Failed to perform backtest.");
+                }
+            } catch (error) {
+                displayError(`Error performing backtest: ${error.message}`);
             }
         }
 
-        // Function to display the latest stock
+        // Process uploaded Excel file
+        async function processExcelFile(event) {
+            event.preventDefault();
+
+            const fileInput = document.getElementById("excelFile");
+            const loadingIndicator = document.getElementById("loading-indicator");
+
+            const file = fileInput.files[0];
+            if (!file) {
+                displayError("Please select an Excel file first.");
+                return;
+            }
+
+            const reader = new FileReader();
+
+            // Show the loading indicator
+            loadingIndicator.style.display = "block";
+
+            reader.onload = function (e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: "array" });
+                const sheetName = workbook.SheetNames[0];
+                const sheetData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+
+                // Send the data to the backend
+                sendDataToBackend(sheetData).finally(() => {
+                    loadingIndicator.style.display = "none"; // Hide the loading indicator
+                });
+            };
+
+            reader.readAsArrayBuffer(file);
+        }
+
+        async function sendDataToBackend(data) {
+            try {
+                const response = await fetch("/api/upload", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(data),
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    displayBacktestResults(data);
+                } else {
+                    displayError("Failed to upload Excel data.");
+                }
+            } catch (error) {
+                displayError(`Error uploading Excel data: ${error.message}`);
+            }
+        }
+
+        // Display functions
         function displayLatestStock(stock) {
             const latestStockDiv = document.getElementById("latest-stock-data");
             if (stock) {
                 latestStockDiv.innerHTML = `
                     <h3>Latest Stock Data</h3>
-                    <p>Date: ${stock.date}</p>
-                    <p>Price: ${stock.price || "N/A"}</p>
-                    <p>EPS: ${stock.EPS || "N/A"}</p>
-                    <p>PER: ${stock.PER || "N/A"}</p>
+                    <p>Date: ${safeValue(stock.date)}</p>
+                    <p>Price: ${safeValue(stock.price)}</p>
+                    <p>EPS: ${safeValue(stock.EPS)}</p>
+                    <p>PER: ${safeValue(stock.PER)}</p>
                 `;
             } else {
                 latestStockDiv.innerHTML = `<p>No stock data found.</p>`;
             }
         }
 
-        // Function to display all stocks
         function displayAllStocks(stocks) {
             const allStocksTable = document.getElementById("all-stocks-data");
             if (stocks.length > 0) {
                 allStocksTable.innerHTML = `
                     <h3>All Stock Data</h3>
-                    <table border="1" cellspacing="0" cellpadding="5">
+                    <table border="1">
                         <thead>
                             <tr>
                                 <th>Date</th>
@@ -92,17 +176,17 @@
                         </thead>
                         <tbody>
                             ${stocks
-                        .map(
-                            (stock) => `
-                                    <tr>
-                                        <td>${stock.date}</td>
-                                        <td>${stock.price || "N/A"}</td>
-                                        <td>${stock.EPS || "N/A"}</td>
-                                        <td>${stock.PER || "N/A"}</td>
-                                    </tr>
-                                `
-                        )
-                        .join("")}
+                                .map(
+                                    (stock) => `
+                                        <tr>
+                                            <td>${safeValue(stock.date)}</td>
+                                            <td>${safeValue(stock.price)}</td>
+                                            <td>${safeValue(stock.EPS)}</td>
+                                            <td>${safeValue(stock.PER)}</td>
+                                        </tr>
+                                    `
+                                )
+                                .join("")}
                         </tbody>
                     </table>
                 `;
@@ -111,40 +195,53 @@
             }
         }
 
-        // Function to display backtest results
         function displayBacktestResults(results) {
             const backtestDiv = document.getElementById("backtest-results");
             if (results.length > 0) {
                 backtestDiv.innerHTML = `
                     <h3>Backtest Results</h3>
-                    <table border="1" cellspacing="0" cellpadding="5">
+                    <table border="1">
                         <thead>
                             <tr>
                                 <th>Stock ID</th>
-                                <th>Kelly</th>
-                                <th>Verdict</th>
+                                <th>Current Price</th>
+                                <th>Median Price</th>
+                                <th>T$</th>
+                                <th>MP UpDown</th>
                                 <th>1M MR</th>
                                 <th>2M MR</th>
                                 <th>3M MR</th>
                                 <th>Avg.</th>
+                                <th>Kelly</th>
+                                <th>Verdict</th>
+                                <th>1M Incident</th>
+                                <th>2M Incident</th>
+                                <th>3M Incident</th>
                             </tr>
                         </thead>
                         <tbody>
                             ${results
-                        .map(
-                            (result) => `
-                                    <tr>
-                                        <td>${result["Stock ID"]}</td>
-                                        <td>${result["Kelly"] || "N/A"}</td>
-                                        <td>${result["Verdict"] ? "Yes" : "No"}</td>
-                                        <td>${result["1M MR"] || "N/A"}</td>
-                                        <td>${result["2M MR"] || "N/A"}</td>
-                                        <td>${result["3M MR"] || "N/A"}</td>
-                                        <td>${result["Avg."] || "N/A"}</td>
-                                    </tr>
-                                `
-                        )
-                        .join("")}
+                                .map(
+                                    (result) => `
+                                        <tr>
+                                            <td>${safeValue(result["Stock ID"])}</td>
+                                            <td>${safeValue(result["C$"])}</td>
+                                            <td>${safeValue(result["M$"])}</td>
+                                            <td>${safeValue(result["T$"])}</td>
+                                            <td>${safeValue(result["MP UpDown"])}</td>
+                                            <td>${safeValue(result["1M MR"])}</td>
+                                            <td>${safeValue(result["2M MR"])}</td>
+                                            <td>${safeValue(result["3M MR"])}</td>
+                                            <td>${safeValue(result["Avg."])}</td>
+                                            <td>${safeValue(result["Kelly"])}</td>
+                                            <td>${result["Verdict"] ? "Yes" : "No"}</td>
+                                            <td>${safeValue(result["1M Incident"])}</td>
+                                            <td>${safeValue(result["2M Incident"])}</td>
+                                            <td>${safeValue(result["3M Incident"])}</td>
+                                        </tr>
+                                    `
+                                )
+                                .join("")}
                         </tbody>
                     </table>
                 `;
@@ -152,58 +249,8 @@
                 backtestDiv.innerHTML = `<p>No backtest results found.</p>`;
             }
         }
-        // Function to process the uploaded Excel file
-        async function processExcelFile(event) {
-            event.preventDefault(); // Prevent form submission
-            console.log("processExcelFile triggered");
 
-            const fileInput = document.getElementById("excelFile");
-            if (!fileInput.files[0]) {
-                displayError("Please select an Excel file first.");
-                return;
-            }
-
-            const file = fileInput.files[0];
-            const reader = new FileReader();
-
-            reader.onload = function (e) {
-                const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, { type: "array" });
-
-                // Convert the first sheet to JSON
-                const sheetName = workbook.SheetNames[0];
-                const sheetData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
-
-                // Send data to Flask backend
-                sendDataToBackend(sheetData);
-            };
-
-            reader.readAsArrayBuffer(file);
-        }
-
-        async function sendDataToBackend(data) {
-            console.log(data);
-            try {
-                const response = await fetch("/api/upload", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(data),
-                });
-
-                if (response.ok) {
-                    const result = await response.json();
-                    alert("Excel data successfully uploaded and processed!");
-                } else {
-                    displayError("Failed to upload Excel data.");
-                }
-            } catch (error) {
-                displayError(`Error: ${error.message}`);
-            }
-        }
-
-        // Function to display errors
+        // Display error messages
         function displayError(message) {
             const errorDiv = document.getElementById("error");
             errorDiv.innerHTML = `<p style="color: red;">${message}</p>`;
@@ -212,50 +259,43 @@
 </head>
 
 <body>
-    <h1>I Fetch Stock Data!!!!</h1>
+    <h1>Stock Data Fetcher</h1>
+    <div id="loading-indicator" style="display: none; text-align: center;">
+        <p>Loading... Please wait.</p>
+    </div>
 
-    <!-- Form for fetching the latest stock data -->
-    <form id="latest-stock-form" onsubmit="fetchLatestStock(event)">
-        <label for="latest_stock_id">Enter Stock ID for latest info:</label>
-        <input type="text" id="latest_stock_id" required />
-        <button type="submit">Fetch Latest Stock Info</button>
+    <!-- Forms -->
+    <form onsubmit="fetchLatestStock(event)">
+        <label for="latest_stock_id">Stock ID:</label>
+        <input id="latest_stock_id" required />
+        <button type="submit">Fetch Latest</button>
     </form>
     <div id="latest-stock-data"></div>
 
-    <hr />
-
-    <!-- Form for uploading and processing Excel file -->
-    <form id="excel-upload-form" onsubmit="processExcelFile(event)">
-        <label for="excelFile">Upload Excel file:</label>
-        <input type="file" id="excelFile" accept=".xls,.xlsx" required />
-        <button type="submit">Upload and Process</button>
+    <form onsubmit="processExcelFile(event)">
+        <label for="excelFile">Excel File:</label>
+        <input id="excelFile" type="file" accept=".xls,.xlsx" required />
+        <button type="submit">Upload</button>
     </form>
 
-    <!-- Form for fetching all stock data -->
-    <form id="all-stocks-form" onsubmit="fetchAllStocks(event)">
-        <label for="fetch_stock_id">Enter Stock ID for all info:</label>
-        <input type="text" id="fetch_stock_id" required />
-        <label for="limit">Limit:</label>
-        <input type="number" id="limit" min="1" max="100" value="100" />
-        <label for="offset">Offset:</label>
-        <input type="number" id="offset" min="0" value="0" />
-        <button type="submit">Fetch All Stock Info</button>
+    <form onsubmit="fetchAllStocks(event)">
+        <label>Stock ID:</label>
+        <input id="fetch_stock_id" required />
+        <label>Limit:</label>
+        <input id="limit" type="number" min="1" value="100" />
+        <label>Offset:</label>
+        <input id="offset" type="number" min="0" value="0" />
+        <button type="submit">Fetch All</button>
     </form>
     <div id="all-stocks-data"></div>
 
-    <hr />
-
-    <!-- Form for backtesting -->
-    <form id="backtest-form" onsubmit="performBacktest(event)">
-        <label for="backtest_stock_ids">Enter Stock IDs for backtest (comma-separated):</label>
-        <input type="text" id="backtest_stock_ids" required />
-        <button type="submit">Perform Backtest</button>
+    <form onsubmit="performBacktest(event)">
+        <label>Stock IDs (comma-separated):</label>
+        <input id="backtest_stock_ids" required />
+        <button type="submit">Backtest</button>
     </form>
     <div id="backtest-results"></div>
 
-    <hr />
-
-    <!-- Error messages -->
     <div id="error"></div>
 </body>
 

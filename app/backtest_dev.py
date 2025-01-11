@@ -103,8 +103,6 @@ def process_stocks(stock_numbers):
         current_price = stock_data_df["Price"].iloc[-1]  # Most recent price
         median_price = (median_per / current_per) * current_price if current_per != 0 else None
         new_median = stock_data_df["Price"].median()
-        print(median_price)
-        print(new_median)
         mp_updown = (median_price - current_price) / current_price if current_price != 0 else None
 
         # Perform Median Reversion backtests

@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, request, Response
 from app.db.db_CRUD import CRUDHelper
 import os
-from app.config import INPUT_STOCK_DIR
+from app.config import INPUT_STOCK_DIR, RESOURCES_DIR
 from app.backtest_dev import process_stocks
 import pandas as pd
 
@@ -96,7 +96,7 @@ def update_stock_data():
 def update_all_stock_data():
     """Update stock data for all stock symbols."""
 
-    with open(INPUT_STOCK_DIR / "stock_numbers.txt", "r") as f:
+    with open(RESOURCES_DIR / "all_stocks_number.txt", "r") as f:
         stock_numbers = f.read().splitlines()
 
     error_stocks = []

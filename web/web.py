@@ -3,7 +3,7 @@ from app.api.api_functions import api  # Import the API blueprint
 
 from app.app_logging import setup_logging
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static', template_folder='templates')
 
 # Register the API blueprint
 app.register_blueprint(api, url_prefix="/api")

@@ -67,9 +67,15 @@ def is_stock_data_up_to_date(stock_number):
             return False
 
         latest_date_in_file = df["ParsedDate"].max()
-        current_date = datetime.now()
+        # Check if the data is up-to-date with the most recent weekday
+        today = datetime.now().date()
+        if today.weekday() >= 5:  # 5 = Saturday, 6 = Sunday
+            most_recent_weekday = today - \
+                timedelta(days=today.weekday() - 4)
+        else:
+            most_recent_weekday = today
 
-        if latest_date_in_file < current_date:
+        if latest_date_in_file < most_recent_weekday:
             logging.info(
                 f"Data in {stock_file} is outdated. Latest date: {latest_date_in_file}"
             )
@@ -158,7 +164,10 @@ def download_stock_data(stock_numbers):
                 # Convert EPS and PER to numeric and filter out rows where values are over 100000
                 df["EPS"] = pd.to_numeric(df["EPS"], errors="coerce")
                 df["PER"] = pd.to_numeric(df["PER"], errors="coerce")
-                df = df[(df["EPS"] <= MAX_EPS) & (df["PER"] <= MAX_PER)]
+                # Replace EPS or PER values exceeding the thresholds with NaN
+                df.loc[df["EPS"] > MAX_EPS, "EPS"] = None
+                df.loc[df["PER"] > MAX_PER, "PER"] = None
+
 
                 save_to_csv(df, output_file_path, False)
                 logging.info(
@@ -182,7 +191,7 @@ def check_and_download_stocks(stock_numbers):
     spinner = Halo(text="Checking stock data...", spinner="line", color="cyan")
     spinner.start()
     stocks_to_download = [s for s in stock_numbers if not is_stock_data_up_to_date(s)]
-
+    error_stocks = []
     if stocks_to_download:
         if len(stocks_to_download) > 10:
             spinner.info(f"{len(stocks_to_download)} Stocks to download")
@@ -191,11 +200,11 @@ def check_and_download_stocks(stock_numbers):
                 f"{len(stocks_to_download)} Stocks to download: {stocks_to_download}"
             )
         logging.info(f"Stocks to download: {stocks_to_download}")
-        download_stock_data(stocks_to_download)
+        error_stocks = download_stock_data(stocks_to_download)
     else:
         spinner.succeed("All stocks checked, no download required.")
         logging.info("All stocks are up-to-date.")
-
+    return error_stocks
 
 if __name__ == "__main__":
     logging.basicConfig(

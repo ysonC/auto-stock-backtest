@@ -5,8 +5,6 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine, desc
 from app.db.db_models import Stock_Prices_Weekly
 from app.helpers import parse_custom_date
-from app.download_stocks import download_stock_data
-from datetime import datetime, timedelta
 from app.config import DOWNLOAD_DIR
 from app.helpers import read_csv
 

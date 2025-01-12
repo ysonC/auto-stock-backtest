@@ -89,93 +89,65 @@ class CRUDHelper:
             self.session.close()
 
     def update_stock_data(self, stock_id):
-        """Check and update 
-        tock data for a given stock symbol."""
+        """Prepare missing stock data for insertion."""
+        stock_file_path = DOWNLOAD_DIR / f"{stock_id}.csv"
+
+        # Check if the stock file exists
+        if not stock_file_path.exists():
+            logging.error(f"Stock file {stock_file_path} not found. Please ensure data is downloaded.")
+            return []
+
         try:
             # Fetch the latest stock info
             latest_stock = self.get_latest_stock_info(stock_id)
 
-            # If no data exists, download everything
-            if not latest_stock:
-                logging.info(
-                    f"No data for stock {stock_id}, downloading all data.")
-                error_stocks = download_stock_data([stock_id])
-                if stock_id in error_stocks:
-                    logging.error(
-                        f"Stock {stock_id} not found. Download failed.")
-                    return False
-
-                # Read and parse the downloaded data
-                df = read_csv(DOWNLOAD_DIR / f"{stock_id}.csv")
-                df['Date'] = df['Date'].apply(parse_custom_date)
-                df['Price'] = pd.to_numeric(df['Price'], errors='coerce')
-                df['EPS'] = pd.to_numeric(df['EPS'], errors='coerce')
-                df['PER'] = pd.to_numeric(df['PER'], errors='coerce')
-
-                # Insert new rows into the database
-                for _, row in df.iterrows():
-                    stock = Stock_Prices_Weekly(
-                        stock_id=stock_id,
-                        date=row['Date'],
-                        price=row['Price'],
-                        EPS=row['EPS'],
-                        PER=row['PER']
-                    )
-                    self.session.add(stock)
-                self.session.commit()
-                return True
-
-            # Check if the data is up-to-date with the most recent weekday
-            today = datetime.now().date()
-            if today.weekday() >= 5:  # 5 = Saturday, 6 = Sunday
-                most_recent_weekday = today - \
-                    timedelta(days=today.weekday() - 4)
-            else:
-                most_recent_weekday = today
-
-            # Compare the latest stock date with the most recent weekday
-            logging.info(
-                f"Comparing latest_stock.Date: {latest_stock.date} with most_recent_weekday: {most_recent_weekday}")
-            if latest_stock.date == most_recent_weekday:
-                logging.info(
-                    f"Stock {stock_id} data is up-to-date. No update required.")
-                return True
-
-            # Download the latest data
-            download_stock_data([stock_id])
-            downloaded_file_path = f"app/data/raw/{stock_id}.csv"
-
             # Read and parse the downloaded data
-            df = pd.read_csv(downloaded_file_path)
+            df = read_csv(stock_file_path)
             df['Date'] = df['Date'].apply(parse_custom_date)
             df['Price'] = pd.to_numeric(df['Price'], errors='coerce')
             df['EPS'] = pd.to_numeric(df['EPS'], errors='coerce')
             df['PER'] = pd.to_numeric(df['PER'], errors='coerce')
 
-            # Filter data to include only new entries
-            df = df[df['Date'] > latest_stock.date]
-            if df.empty:
-                logging.info(f"No new data for stock {stock_id}.")
-                return True
+            # If no data exists in the database, return all rows as missing
+            if not latest_stock:
+                logging.info(f"No data for stock {stock_id} in the database. Preparing all rows for insertion.")
+            else:
+                # Filter data to include only new entries
+                df = df[df['Date'] > latest_stock.date]
+                if df.empty:
+                    logging.info(f"No new data for stock {stock_id}. Data is already up-to-date.")
+                    return []
 
-            # Insert new rows into the database
-            for _, row in df.iterrows():
-                stock = Stock_Prices_Weekly(
+            # Create and return a list of Stock_Prices_Weekly objects
+            stock_records = [
+                Stock_Prices_Weekly(
                     stock_id=stock_id,
                     date=row['Date'],
                     price=row['Price'],
                     EPS=row['EPS'],
                     PER=row['PER']
                 )
-                self.session.add(stock)
+                for _, row in df.iterrows()
+            ]
+
+            logging.info(f"Prepared {len(stock_records)} new records for stock {stock_id}.")
+            return stock_records
+        except Exception as e:
+            logging.error(f"Error preparing stock {stock_id}: {e}")
+            return []
+
+            
+    def add_bulk_stock_data(self, stock_records):
+        """Insert multiple stock records into the database in bulk."""
+        try:
+            self.session.bulk_save_objects(stock_records)
             self.session.commit()
-            logging.info(f"Stock {stock_id} updated successfully.")
+            logging.info(f"Inserted {len(stock_records)} records into the database successfully.")
             return True
         except Exception as e:
-            logging.error(f"Error updating stock {stock_id}: {e}")
+            logging.error(f"Error inserting bulk stock data: {e}")
             self.session.rollback()
             return False
-
         finally:
             self.session.close()
 

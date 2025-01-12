@@ -1,8 +1,9 @@
-from flask import Blueprint, jsonify, request, Response
+from flask import Blueprint, jsonify, request, Response, json
 from app.db.db_CRUD import CRUDHelper
 import os
 from app.config import INPUT_STOCK_DIR, RESOURCES_DIR
 from app.backtest_dev import process_stocks
+from app.download_stocks import download_stock_data
 import pandas as pd
 
 # Get database URL from environment variable
@@ -95,21 +96,52 @@ def update_stock_data():
 @api.route('/stock/update_all', methods=['POST'])
 def update_all_stock_data():
     """Update stock data for all stock symbols."""
-
     with open(RESOURCES_DIR / "all_stocks_number.txt", "r") as f:
         stock_numbers = f.read().splitlines()
 
-    error_stocks = []
+    # Download all stock data first
+    download_stock_data(stock_numbers)
+
+    all_missing_records = []  # Collect all missing records
+    updated_stocks = []       # Stocks that need to be updated
+    already_updated_stocks = []  # Stocks that are already up-to-date
+    error_stocks = []         # Stocks that encountered errors
+
     for stock_id in stock_numbers:
-        result = crud_helper.update_stock_data(stock_id)
-        print(result)
-        if not result:
+        try:
+            missing_records = crud_helper.update_stock_data(stock_id)
+            if missing_records:
+                all_missing_records.extend(missing_records)
+                updated_stocks.append(stock_id)
+            else:
+                already_updated_stocks.append(stock_id)
+        except Exception as e:
             error_stocks.append(stock_id)
 
-    if error_stocks:
-        return Response(f'{{"error": "Failed to update stocks: {error_stocks}"}}', status=500, mimetype='application/json')
-    return Response('{"message": "Stock data updated successfully"}', status=200, mimetype='application/json')
+    # Insert all missing records into the database at once
+    if all_missing_records:
+        success = crud_helper.add_bulk_stock_data(all_missing_records)
+        if not success:
+            return Response(
+                '{"error": "Failed to insert missing records into the database."}',
+                status=500,
+                mimetype='application/json'
+            )
 
+    # Return categorized results
+    result = {
+        "updated": updated_stocks,
+        "already_updated": already_updated_stocks,
+        "errors": error_stocks
+    }
+
+    # Use json.dumps with separators to format JSON as a single line per array
+    response_json = json.dumps(result, separators=(',', ':'))
+    return Response(
+        response=response_json,
+        status=200,
+        mimetype='application/json'
+    )
 
 @api.route('/stock/backtest', methods=['POST'])
 def perform_backtest():

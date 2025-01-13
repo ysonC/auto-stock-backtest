@@ -3,7 +3,7 @@ from pathlib import Path
 from halo import Halo
 from datetime import datetime, timedelta
 import logging
-from .config import DATA_DIR, STOCK_DATA_DIR, RESOURCES_DIR, RESULTS_DIR, DOWNLOAD_DIR, INPUT_STOCK_DIR, LOGS_DIR
+from app.config import DATA_DIR, STOCK_DATA_DIR, RESOURCES_DIR, RESULTS_DIR, DOWNLOAD_DIR, INPUT_STOCK_DIR, LOGS_DIR
 
 def read_excel(file_path, sheet_name=None):
     """Reads an Excel file into a pandas DataFrame."""
@@ -105,3 +105,17 @@ def parse_custom_date(custom_date):
     except Exception as e:
         logging.warning(f"Error parsing date '{custom_date}': {e}")
         return None
+    
+def get_most_recent_friday():
+    """
+    Get the most recent Friday (including today if today is Friday).
+    """
+    today = datetime.now().date()
+    # Calculate days to subtract to get the most recent Friday
+    days_to_subtract = (today.weekday() - 4) % 7
+    most_recent_friday = today - timedelta(days=days_to_subtract)
+    return most_recent_friday
+
+if __name__ == "__main__":
+    print(get_most_recent_friday())
+    

@@ -67,15 +67,9 @@ def is_stock_data_up_to_date(stock_number):
             return False
 
         latest_date_in_file = df["ParsedDate"].max()
-        # Check if the data is up-to-date with the most recent weekday
-        today = datetime.now().date()
-        if today.weekday() >= 5:  # 5 = Saturday, 6 = Sunday
-            most_recent_weekday = today - \
-                timedelta(days=today.weekday() - 4)
-        else:
-            most_recent_weekday = today
-
-        if latest_date_in_file < most_recent_weekday:
+        
+        # Check if the data is up-to-date with the most recent Friday
+        if latest_date_in_file < get_most_recent_friday():
             logging.info(
                 f"Data in {stock_file} is outdated. Latest date: {latest_date_in_file}"
             )

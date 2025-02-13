@@ -6,6 +6,7 @@ from app import (
     read_stock_numbers_from_file,
     check_and_download_stocks,
     clean_downloaded_stocks,
+    download_data,
     process_stocks,
     check_all_folders,
     setup_logging,
@@ -90,7 +91,16 @@ def main():
 
     # Step 3: Download stock data
     logging.info("Starting stock data download.")
-    check_and_download_stocks(stock_numbers)
+    print("1. To download stock data from Goodinfo, press 1.")
+    print("2. To download shareholder data from Goodinfo, press 2.")
+    choice = input("Enter your choice (1 or 2): ").strip()
+
+    if choice == "1":
+        check_and_download_stocks(stock_numbers)
+
+    elif choice == "2":
+        download_data(stock_numbers, "shareholder")
+
     logging.info("Stock data download completed.")
 
     # Step 4: Clean stock data

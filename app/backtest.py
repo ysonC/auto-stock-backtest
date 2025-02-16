@@ -38,7 +38,7 @@ def median_reversion_calculation(data, weeks, median_per, quartile_per):
     if total_NaN / len(data) > NaN_THRESHOLD:
         logging.warning(
             f"NaN values exceed the threshold of {NaN_THRESHOLD * 100}%. Returning NaN.")
-        return float('nan')
+        return float('nan'), float('nan')
 
     for i in range(len(data) - weeks):
         enter_PER = data["PER"].iloc[i]

@@ -1,16 +1,18 @@
-import pandas as pd
 import logging
-from webdriver_manager.chrome import ChromeDriverManager
-from selenium.webdriver.chrome.service import Service as ChromeService
+from pathlib import Path
+
+import pandas as pd
+from bs4 import BeautifulSoup
+from halo import Halo
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
-from bs4 import BeautifulSoup
-from pathlib import Path
-from halo import Halo
-from app.helpers import *
+from webdriver_manager.chrome import ChromeDriverManager
+
 from app.config import DOWNLOAD_DIR, WEB_CHROMEDRIVER_PATH
+from app.helpers import *
 
 MAX_PER = 1000000
 MAX_EPS = 1000000
@@ -67,7 +69,7 @@ def is_stock_data_up_to_date(stock_number):
             return False
 
         latest_date_in_file = df["ParsedDate"].max()
-        
+
         # Check if the data is up-to-date with the most recent Friday
         if latest_date_in_file < get_most_recent_friday():
             logging.info(
@@ -162,7 +164,6 @@ def download_stock_data(stock_numbers):
                 df.loc[df["EPS"] > MAX_EPS, "EPS"] = None
                 df.loc[df["PER"] > MAX_PER, "PER"] = None
 
-
                 save_to_csv(df, output_file_path, False)
                 logging.info(
                     f"Downloaded and saved data for stock {stock_number} to {output_file_path}."
@@ -199,6 +200,7 @@ def check_and_download_stocks(stock_numbers):
         spinner.succeed("All stocks checked, no download required.")
         logging.info("All stocks are up-to-date.")
     return error_stocks
+
 
 if __name__ == "__main__":
     logging.basicConfig(
